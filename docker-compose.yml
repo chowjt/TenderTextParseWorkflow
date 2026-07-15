@@ -1,0 +1,17 @@
+services:
+  beijingshiye-tender-text-parse:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: beijingshiye-tender-text-parse:latest
+    container_name: beijingshiye-tender-text-parse
+    ports:
+      - "26715:26715"
+    env_file:
+      - .env
+    volumes:
+      # 本地持久化：SQLite 数据库目录
+      - ./data:/tmp/beijingshiye-tender-text-parse/data
+      # 本地持久化：日志文件目录
+      - ./logs:/tmp/beijingshiye-tender-text-parse/logs
+    restart: unless-stopped
