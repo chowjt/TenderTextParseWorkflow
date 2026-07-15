@@ -106,13 +106,22 @@ python main.py
 #### 1. 构建镜像
 
 ```bash
-docker build -t beijingshiye-tender-text-parse:latest .
+docker build -t tender-text-parse:latest .
+```
+
+如果构建环境访问 PyPI 较慢或无法访问，可指定国内镜像源：
+
+```bash
+docker build \
+  --build-arg PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple \
+  --build-arg PIP_TRUSTED_HOST=pypi.tuna.tsinghua.edu.cn \
+  -t tender-text-parse:latest .
 ```
 
 #### 2. 运行容器
 
 ```bash
-docker run -d -p 26715:26715 --name beijingshiye-tender-text-parse --env-file .env beijingshiye-tender-text-parse:latest
+docker run -d -p 26715:26715 --name tender-text-parse --env-file .env tender-text-parse:latest
 ```
 
 ### 方式三：Docker Compose 启动（推荐）
@@ -241,6 +250,7 @@ GET /api/v1/logs/stats?range_type=1d
 3. 当前仅支持非流式返回（`stream=false`）。
 4. 使用 Docker 部署时，`.env` 文件不会被复制到镜像中，请通过 `docker run --env-file .env` 或 `docker compose` 的方式传入环境变量。
 5. `data/` 和 `logs/` 目录已通过 Docker Compose 挂载到本地，容器删除后数据不会丢失。
+6. 如果 Docker 构建时出现 `Network is unreachable` 警告，说明构建环境无法访问 PyPI，可通过 `--build-arg PIP_INDEX_URL=...` 指定国内镜像源。
 
 ---
 
