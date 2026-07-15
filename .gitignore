@@ -1,0 +1,15 @@
+# 敏感文件
+.env
+
+# Python缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 日志
+logs/
+
+# IDE
+.idea/
+.vscode/
+*.iml

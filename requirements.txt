@@ -1,0 +1,21 @@
+# LangChain 1.0 LTS core
+langchain>=1.0,<2.0
+langchain-core>=1.0,<2.0
+langgraph>=1.0,<2.0
+langsmith>=0.3.0
+
+# Model providers - DeepSeek via OpenAI-compatible API
+langchain-openai>=0.3.0
+
+# Structured output & validation
+pydantic>=2.0
+
+# Environment variables
+python-dotenv>=1.0
+
+# Web framework
+fastapi>=0.110
+uvicorn[standard]>=0.29
+
+# Logging
+python-json-logger>=2.0

@@ -1,0 +1,1687 @@
+﻿{
+  "nodes": [
+    {
+      "nodeId": "userGuide",
+      "name": "common:core.module.template.system_config",
+      "intro": "common:core.module.template.system_config_info",
+      "avatar": "core/workflow/template/systemConfig",
+      "flowNodeType": "userGuide",
+      "position": {
+        "x": -1781.7212965799288,
+        "y": -1627.5037787505719
+      },
+      "version": "481",
+      "inputs": [
+        {
+          "key": "welcomeText",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "valueType": "string",
+          "label": "core.app.Welcome Text",
+          "value": ""
+        },
+        {
+          "key": "variables",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "valueType": "any",
+          "label": "core.app.Chat Variable",
+          "value": []
+        },
+        {
+          "key": "questionGuide",
+          "valueType": "any",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "core.app.Question Guide",
+          "value": {
+            "open": false
+          }
+        },
+        {
+          "key": "tts",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "valueType": "any",
+          "label": "",
+          "value": {
+            "type": "web"
+          }
+        },
+        {
+          "key": "whisper",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "valueType": "any",
+          "label": "",
+          "value": {
+            "open": false,
+            "autoSend": false,
+            "autoTTSResponse": false
+          }
+        },
+        {
+          "key": "scheduleTrigger",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "valueType": "any",
+          "label": "",
+          "value": null
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "nodeId": "448745",
+      "name": "common:core.module.template.work_start",
+      "intro": "",
+      "avatar": "core/workflow/template/workflowStart",
+      "flowNodeType": "workflowStart",
+      "position": {
+        "x": -1142.9368825515521,
+        "y": -1560.0052974146633
+      },
+      "version": "481",
+      "inputs": [
+        {
+          "key": "userChatInput",
+          "renderTypeList": [
+            "reference",
+            "textarea"
+          ],
+          "valueType": "string",
+          "label": "workflow:user_question",
+          "required": true,
+          "toolDescription": "用户问题",
+          "debugLabel": ""
+        }
+      ],
+      "outputs": [
+        {
+          "id": "userChatInput",
+          "key": "userChatInput",
+          "label": "common:core.module.input.label.user question",
+          "type": "static",
+          "valueType": "string",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "nodeId": "sIT99QNwT9m3SiQM",
+      "name": "判断公告类型",
+      "intro": "根据一定的条件，执行不同的分支。",
+      "avatar": "core/workflow/template/ifelse",
+      "flowNodeType": "ifElseNode",
+      "showStatus": true,
+      "position": {
+        "x": 417.1959771981479,
+        "y": -1637.8680491327113
+      },
+      "inputs": [
+        {
+          "key": "ifElseList",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "valueType": "any",
+          "label": "",
+          "value": [
+            {
+              "condition": "AND",
+              "list": [
+                {
+                  "variable": [
+                    "VARIABLE_NODE_ID",
+                    "noticeType"
+                  ],
+                  "condition": "equalTo",
+                  "value": "招标公告",
+                  "valueType": "input"
+                }
+              ]
+            },
+            {
+              "condition": "AND",
+              "list": [
+                {
+                  "variable": [
+                    "VARIABLE_NODE_ID",
+                    "noticeType"
+                  ],
+                  "condition": "equalTo",
+                  "value": "变更公告",
+                  "valueType": "input"
+                }
+              ]
+            },
+            {
+              "condition": "AND",
+              "list": [
+                {
+                  "variable": [
+                    "VARIABLE_NODE_ID",
+                    "noticeType"
+                  ],
+                  "condition": "equalTo",
+                  "value": "中标候选人公示",
+                  "valueType": "input"
+                }
+              ]
+            },
+            {
+              "condition": "AND",
+              "list": [
+                {
+                  "variable": [
+                    "VARIABLE_NODE_ID",
+                    "noticeType"
+                  ],
+                  "condition": "equalTo",
+                  "value": "结果公告",
+                  "valueType": "input"
+                }
+              ]
+            }
+          ],
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        }
+      ],
+      "outputs": [
+        {
+          "id": "ifElseResult",
+          "key": "ifElseResult",
+          "label": "workflow:judgment_result",
+          "valueType": "string",
+          "type": "static",
+          "valueDesc": "",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "nodeId": "zda3vj7BvdcFPeAI",
+      "name": "指定回复",
+      "intro": "该模块可以直接回复一段指定的内容。常用于引导、提示。非字符串内容传入时，会转成字符串进行输出。",
+      "avatar": "core/workflow/template/reply",
+      "flowNodeType": "answerNode",
+      "position": {
+        "x": 2285.079478754243,
+        "y": -768.8680491327112
+      },
+      "inputs": [
+        {
+          "key": "text",
+          "renderTypeList": [
+            "textarea",
+            "reference"
+          ],
+          "valueType": "any",
+          "required": true,
+          "label": "common:core.module.input.label.Response content",
+          "description": "common:core.module.input.description.Response content",
+          "placeholder": "common:core.module.input.description.Response content",
+          "value": "不支持解析的公告类型！当前支持的公告类型为：招标公告、变更公告、中标候选人公示和结果公告。",
+          "valueDesc": "",
+          "debugLabel": "",
+          "toolDescription": "",
+          "isRichText": false,
+          "maxLength": 100000
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "nodeId": "hpBjDyzAQKiDHAwx",
+      "name": "解析招标公告正文",
+      "intro": "AI 大模型对话",
+      "avatar": "core/workflow/template/aiChat",
+      "flowNodeType": "chatNode",
+      "showStatus": true,
+      "position": {
+        "x": 3007.955932898934,
+        "y": -2453.0104403738605
+      },
+      "version": "4.9.7",
+      "inputs": [
+        {
+          "key": "model",
+          "renderTypeList": [
+            "settingLLMModel",
+            "reference"
+          ],
+          "label": "common:core.module.input.label.aiModel",
+          "valueType": "string",
+          "value": "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "temperature",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "number",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": "",
+          "value": 4
+        },
+        {
+          "key": "maxToken",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "number",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "isResponseAnswerText",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "value": true,
+          "valueType": "boolean",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatQuoteRole",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "value": "system",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "quoteTemplate",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "quotePrompt",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatVision",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "boolean",
+          "value": true,
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatReasoning",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "boolean",
+          "value": true,
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatTopP",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "number",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatStopSign",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatResponseFormat",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatJsonSchema",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "systemPrompt",
+          "renderTypeList": [
+            "textarea",
+            "reference"
+          ],
+          "max": 3000,
+          "valueType": "string",
+          "label": "common:core.ai.Prompt",
+          "description": "common:core.app.tip.systemPromptTip",
+          "placeholder": "common:core.app.tip.chatNodeSystemPromptTip",
+          "valueDesc": "",
+          "debugLabel": "",
+          "toolDescription": "",
+          "value": "- Role:\n你是一名烟草招采公告解析专员，专注于解析烟草行业（含中烟工业、各卷烟厂）招采公告文本，精准提取公告中的关键信息（如项目名称、编号、招标人、联系方式、标段/包名称、开标时间等核心字段），确保提取信息的准确性、完整性和规范性，为招采相关后续工作（如投标筹备、信息归档、合规审核）提供基础支撑。\n\n- Skills:\n1、具备较强的文本筛选与信息提炼能力，熟悉烟草行业招采公告的标准格式、常用表述及行业规范，能快速识别公告中的核心字段和关键条款，规避信息遗漏或解读偏差；\n2、了解烟草行业招采相关政策，能精准区分招标人、招标代理机构的相关信息，清晰梳理标段划分、时间节点等核心内容；\n3、具备严谨细致的工作态度，对数字、编号、联系方式等细节信息敏感度高，确保解析结果可直接用于实际工作。\n\n- Background:\n烟草行业招采工作具有严格的合规性要求，公告文本结构规范、信息密度高，包含大量关键字段（如项目编号、招标人信息、标段划分、开标时间等），且部分信息（如资格要求、时间节点）直接影响投标有效性和招采工作的合规性。但公告文本篇幅较长、条款繁杂，直接阅读筛选核心信息耗时费力，易出现信息遗漏、解读偏差等问题，影响后续投标筹备、信息归档等工作效率。\n在此背景下，烟草招采公告解析工作应运而生，解析者需依托对烟草行业招采规范的了解，对公告文本进行系统性拆解，精准提取预设核心字段，梳理关键流程和要求，将繁杂的公告文本转化为清晰、规范、可直接使用的核心信息，为投标单位精准对接招采需求、监管部门开展合规监督、相关方推进工作提供高效支撑，保障烟草招采工作的顺畅推进，确保招采过程的公开、公平、公正。\n\n- Task:\n1、从用户问题输入中，按照Rules(规则)提取出目标字段；\n2、输出标准的json格式的提取结果。\n\n- Goals:\n1、从用户问题输入中提取并输出含有以下目标字段的json代码块。\ndupUid：主表业务主键\nprojectName：项目名称\nprojectNumber：项目编号\ntendererName：招标人名称\ntendererPhoneNumber：招标人联系电话\nprojectScale：项目规模\ntenderContentandScope：招标内容与范围\npackageName：包名称（标段名称）\nbidSubmissionDeadline：投标截止日期\nbidOpenDate：开标日期\nspare1：备用字段1\nspare2：备用字段2\nspare3：备用字段3\n\n- Rules:\n1、直接将用户问题输入中的业务主键字段的值，填入dupUid字段；\n2、仅从给定的【公告正文】中提取信息，不得编造、不得补充、不得省略、不得推理，仅对项目规模中的金额数值作十进制数相加运算；\n3、提取文本中“招标条件本招标项目”后面直到“（招标项目编号）”之前的完整项目名称，填入projectName字段；\n4、提取文本中“招标项目编号：”冒号后的完整项目编号字符串，填入projectNumber字段；\n5、提取文本中“九、联系方式 招标人：”后面的完整招标人名称，填入tendererName字段；\n6、提取招标人信息下方对应的 “电话：” 后面的完整招标人联系电话号码，填入tendererPhoneNumber字段；\n7、提取出该项目的具体预算金额数值及对应单位规则：\n7.1、找到文本中对项目规模的原文描述，a、b、c、d选其一：\na、当项目规模提及具体预算金额数值时，直接提取出该项目的具体预算金额数值，不要带单位和币种，填入projectScale字段；\nb、当项目规模仅提及最高限价时，提取出最高限价金额数值，不要带单位和币种，填入projectScale字段；\nc、当项目规模提及预算金额和最高限价时，提取出最高限价金额数值，不要带单位和币种，填入projectScale字段；\nd、当项目规模仅提及标段号或标段名称时，需要将各标段号或标段名称对应的金额数值进行十进制数相加运算，不要带单位和币种，把相加总和填入projectScale字段；\n7.2、提取出金额数值对应的金额单位（包括复合计价单位），例如：元、万元、元/年、元/吨等，若提及币种、含税情况（含税、不含税），也一并提取，放入括号中，填入spare1字段；\n7.3、projectScale字段的金额数值务必匹配上spare1字段的金额单位；\n8、提取文本中对招标内容与范围的原文描述，填入tenderContentandScope字段；\n9、找到文本中句子：“本招标项目划分为X个标段，本次招标为其中的：”，提取下面所有包含001、002…开头的标段号及标段名称(以分号作为单包分隔符)，以字符串数组形式输出：[\"包1名称\",\"包2名称\"]，填入packageName字段；\n10、提取文本中“五、投标文件的递交递交截止时间：”后面的完整投标截止日期时间字符串，填入bidSubmissionDeadline字段；\n11、提取文本中“六、开标时间及地点开标时间：”后面的完整开标日期时间字符串，填入bidOpenDate字段；\n12、packageName必须是数组，即使只有1个包也要数组，提取的单包名称要完整；\n13、投标截止日期字符串原样保留，不要格式化；\n14、开标日期字符串原样保留，不要格式化；\n15、严格以json格式输出，带有代码块(```)包裹，无任何其他文字。\n\n- Notes:\n1、严格遵循Rules(规则)执行，Example(示例)仅作格式参考！\n2、【公告正文】中可能存在表格形式的数据，务必识别出这些表格及数据，不要识别错了，这非常重要！\n3、【公告正文】中可能存在描述重复的数据，务必识别出这些重复数据，不要输出，这非常重要！\n4、仅根据要求提取出目标字段信息即可，不要自作主张做要求之外的其它处理！\n5、若没有提取到目标字段数据，该字段值留空即可。\n\n- OutputFormat:\n```json\n{\n\"dupUid\": \"\",\n\"projectName\": \"\",\n\"projectNumber\": \"\",\n\"tendererName\": \"\",\n\"tendererPhoneNumber\": \"\",\n\"projectScale\": \"\",\n\"tenderContentandScope\": \"\",\n\"packageName\": [],\n\"bidSubmissionDeadline\": \"\",\n\"bidOpenDate\": \"\",\n\"spare1\": \"\",\n\"spare2\": \"\",\n\"spare3\": \"\"\n}\n```\n\n- Example:\n```json\n{\n\"dupUid\": \"25df03a65bf53cf48b908ff419d9b827\",\n\"projectName\": \"重庆中烟车辆管理系统\",\n\"projectNumber\": \"C202501BA2001924857321\",\n\"tendererName\": \"重庆中烟工业有限责任公司\",\n\"tendererPhoneNumber\": \"023-62901335\",\n\"projectScale\": \"24.0\",\n\"tenderContentandScope\": \"建设重庆中烟工业有限责任公司总部建设公务用车车辆管理系统，功能包括：基础信息管理、流程审批、综合管理、移动应用、综合查询、统计报表、系统集成和综合监控。具体内容详见招标文件“第四章 项目概况及要求”。\",\n\"packageName\": [\"001 重庆中烟车辆管理系统\"],\n\"bidSubmissionDeadline\": \"2026年01月05日11时00分00秒\",\n\"bidOpenDate\": \"2026年01月05日11时00分00秒\",\n\"spare1\": \"万元(人民币)\",\n\"spare2\": \"\",\n\"spare3\": \"\"\n}\n```",
+          "maxLength": 100000,
+          "isRichText": true
+        },
+        {
+          "key": "history",
+          "renderTypeList": [
+            "numberInput",
+            "reference"
+          ],
+          "valueType": "chatHistory",
+          "label": "common:core.module.input.label.chat history",
+          "description": "workflow:max_dialog_rounds",
+          "required": true,
+          "min": 0,
+          "max": 50,
+          "value": 0,
+          "valueDesc": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "quoteQA",
+          "renderTypeList": [
+            "settingDatasetQuotePrompt"
+          ],
+          "label": "",
+          "debugLabel": "知识库引用",
+          "description": "",
+          "valueType": "datasetQuote",
+          "valueDesc": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "fileUrlList",
+          "renderTypeList": [
+            "reference",
+            "input"
+          ],
+          "label": "app:workflow.user_file_input",
+          "debugLabel": "文件链接",
+          "description": "app:workflow.user_file_input_desc",
+          "valueType": "arrayString",
+          "value": [
+            [
+              "448745",
+              "userFiles"
+            ]
+          ],
+          "valueDesc": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "userChatInput",
+          "renderTypeList": [
+            "reference",
+            "textarea"
+          ],
+          "valueType": "string",
+          "label": "workflow:user_question",
+          "toolDescription": "用户问题",
+          "required": true,
+          "value": "自增id：{{$VARIABLE_NODE_ID.id$}}。\n*业务主键：{{$VARIABLE_NODE_ID.dupUid$}}。\n招采方式：{{$VARIABLE_NODE_ID.procureMethod$}}。\n*公告类型：{{$VARIABLE_NODE_ID.noticeType$}}。\n*公告正文：\n{{$VARIABLE_NODE_ID.content$}}。\n*备用字段1：{{$VARIABLE_NODE_ID.spare1$}}。\n*备用字段2：{{$VARIABLE_NODE_ID.spare2$}}。\n*备用字段3：{{$VARIABLE_NODE_ID.spare3$}}。",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "selectedTypeIndex": 1
+        }
+      ],
+      "outputs": [
+        {
+          "id": "history",
+          "key": "history",
+          "required": true,
+          "label": "common:core.module.output.label.New context",
+          "description": "将本次回复内容拼接上历史记录，作为新的上下文返回",
+          "valueType": "chatHistory",
+          "valueDesc": "{\n  obj: System | Human | AI;\n  value: string;\n}[]",
+          "type": "static"
+        },
+        {
+          "id": "answerText",
+          "key": "answerText",
+          "required": true,
+          "label": "common:core.module.output.label.Ai response content",
+          "description": "将在 stream 回复完毕后触发",
+          "valueType": "string",
+          "type": "static",
+          "valueDesc": ""
+        },
+        {
+          "id": "reasoningText",
+          "key": "reasoningText",
+          "required": false,
+          "label": "workflow:reasoning_content",
+          "valueType": "string",
+          "type": "static",
+          "invalid": false,
+          "valueDesc": "",
+          "description": ""
+        },
+        {
+          "id": "system_error_text",
+          "key": "system_error_text",
+          "type": "error",
+          "valueType": "string",
+          "label": "workflow:error_text",
+          "description": ""
+        }
+      ],
+      "catchError": false
+    },
+    {
+      "nodeId": "rAOYghkLtueUuZ15",
+      "name": "解析变更公告正文",
+      "intro": "AI 大模型对话",
+      "avatar": "core/workflow/template/aiChat",
+      "flowNodeType": "chatNode",
+      "showStatus": true,
+      "position": {
+        "x": 3761.0638272352026,
+        "y": -2453.0104403738605
+      },
+      "version": "4.9.7",
+      "inputs": [
+        {
+          "key": "model",
+          "renderTypeList": [
+            "settingLLMModel",
+            "reference"
+          ],
+          "label": "common:core.module.input.label.aiModel",
+          "valueType": "string",
+          "value": "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "temperature",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "number",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": "",
+          "value": 4
+        },
+        {
+          "key": "maxToken",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "number",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "isResponseAnswerText",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "value": true,
+          "valueType": "boolean",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatQuoteRole",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "value": "system",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "quoteTemplate",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "quotePrompt",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatVision",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "boolean",
+          "value": true,
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatReasoning",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "boolean",
+          "value": true,
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatTopP",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "number",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatStopSign",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatResponseFormat",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatJsonSchema",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "systemPrompt",
+          "renderTypeList": [
+            "textarea",
+            "reference"
+          ],
+          "max": 3000,
+          "valueType": "string",
+          "label": "common:core.ai.Prompt",
+          "description": "common:core.app.tip.systemPromptTip",
+          "placeholder": "common:core.app.tip.chatNodeSystemPromptTip",
+          "valueDesc": "",
+          "debugLabel": "",
+          "toolDescription": "",
+          "value": "- Role:\n你是一名烟草招采公告解析专员，专注于解析烟草行业（含中烟工业、各卷烟厂）招采公告文本，精准提取公告中的关键信息（如项目名称、编号、招标人、联系方式、标段/包名称、变更内容等核心字段），确保提取信息的准确性、完整性和规范性，为招采相关后续工作（如投标筹备、信息归档、合规审核）提供基础支撑。\n\n- Skills:\n1、具备较强的文本筛选与信息提炼能力，熟悉烟草行业招采公告的标准格式、常用表述及行业规范，能快速识别公告中的核心字段和关键条款，规避信息遗漏或解读偏差；\n2、了解烟草行业招采相关政策，能精准区分招标人、招标代理机构的相关信息，清晰梳理标段划分、变更内容等核心内容；\n3、具备严谨细致的工作态度，对数字、编号、联系方式等细节信息敏感度高，确保解析结果可直接用于实际工作。\n\n- Background:\n烟草行业招采工作具有严格的合规性要求，公告文本结构规范、信息密度高，包含大量关键字段（如项目编号、招标人信息、标段划分、变更内容等），且部分信息（如资格要求、时间节点）直接影响投标有效性和招采工作的合规性。但公告文本篇幅较长、条款繁杂，直接阅读筛选核心信息耗时费力，易出现信息遗漏、解读偏差等问题，影响后续投标筹备、信息归档等工作效率。\n在此背景下，烟草招采公告解析工作应运而生，解析者需依托对烟草行业招采规范的了解，对公告文本进行系统性拆解，精准提取预设核心字段，梳理关键流程和要求，将繁杂的公告文本转化为清晰、规范、可直接使用的核心信息，为投标单位精准对接招采需求、监管部门开展合规监督、相关方推进工作提供高效支撑，保障烟草招采工作的顺畅推进，确保招采过程的公开、公平、公正。\n\n- Task:\n1、从用户问题输入中，按照Rules(规则)提取出目标字段；\n2、输出标准的json格式的提取结果。\n\n- Goals:\n1、从用户问题输入中提取并输出含有以下目标字段的json代码块。\ndupUid：主表业务主键\nprojectName：项目名称\nprojectNumber：项目编号\ntendererName：招标人名称\ntendererPhoneNumber：招标人联系电话\nchangeContent：变更内容\nspare1：备用字段1\nspare2：备用字段2\nspare3：备用字段3\n\n- Rules:\n1、直接将用户问题输入中的业务主键字段的值，填入dupUid字段；\n2、仅从给定的【公告正文】中提取信息，不得编造、不得补充、不得省略、不得推理；\n3、提取文本中的完整项目名称，填入projectName字段；\n4、提取文本中的完整项目编号字符串，填入projectNumber字段；\n5、提取文本中的完整招标人名称，填入tendererName字段；\n6、提取招标人信息下方对应的完整招标人联系电话号码，填入tendererPhoneNumber字段；\n7、提取变更内容规则，a、b、c、d选其一：\na、找到文本中和终止公告描述相关的语句，引用原文，可以分点完整输出终止该公告的原因，填入changeContent字段；\nb、找到文本中和流标公告描述相关的语句，引用原文，可以分点完整输出流标该公告的原因，填入changeContent字段；\nc、找到文本中和澄清通知描述相关的语句，可以分点完整输出澄清内容原文，不限字数，填入changeContent字段；\nd、找到文本中和更正公告描述相关的语句，可以分点完整输出更正内容原文，不限字数，填入changeContent字段；\n8、严格以json格式输出，带有代码块(```)包裹，无任何其他文字。\n\n- Notes:\n1、严格遵循Rules(规则)执行，Example(示例)仅作格式参考！\n2、【公告正文】中可能存在表格形式的数据，务必识别出这些表格及数据，不要识别错了，这非常重要！\n3、【公告正文】中可能存在描述重复的数据，务必识别出这些重复数据，不要输出，这非常重要！\n4、仅根据要求提取出目标字段信息即可，不要自作主张做要求之外的其它处理！\n5、若没有提取到目标字段数据，该字段值留空即可。\n\n- OutputFormat:\n```json\n{\n\"dupUid\": \"\",\n\"projectName\": \"\",\n\"projectNumber\": \"\",\n\"tendererName\": \"\",\n\"tendererPhoneNumber\": \"\",\n\"changeContent\": \"\",\n\"spare1\": \"\",\n\"spare2\": \"\",\n\"spare3\": \"\"\n}\n```\n\n- Example:\n```json\n{\n\"dupUid\": \"ccdf55aed16a3e509d24f67958ab8c04\",\n\"projectName\": \"龙岩烟草工业有限责任公司废水站生化池维护改造项目\",\n\"projectNumber\": \"C202501BA2001772878655\",\n\"tendererName\": \"龙岩烟草工业有限责任公司\",\n\"tendererPhoneNumber\": \"0597-2776533\",\n\"changeContent\": \"至投标截止时间止，通过平台递交投标文件的投标人不足3家，本项目按流标处理。\",\n\"spare1\": \"\",\n\"spare2\": \"\",\n\"spare3\": \"\"\n}\n```",
+          "maxLength": 100000,
+          "isRichText": true
+        },
+        {
+          "key": "history",
+          "renderTypeList": [
+            "numberInput",
+            "reference"
+          ],
+          "valueType": "chatHistory",
+          "label": "common:core.module.input.label.chat history",
+          "description": "workflow:max_dialog_rounds",
+          "required": true,
+          "min": 0,
+          "max": 50,
+          "value": 0,
+          "valueDesc": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "quoteQA",
+          "renderTypeList": [
+            "settingDatasetQuotePrompt"
+          ],
+          "label": "",
+          "debugLabel": "知识库引用",
+          "description": "",
+          "valueType": "datasetQuote",
+          "valueDesc": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "fileUrlList",
+          "renderTypeList": [
+            "reference",
+            "input"
+          ],
+          "label": "app:workflow.user_file_input",
+          "debugLabel": "文件链接",
+          "description": "app:workflow.user_file_input_desc",
+          "valueType": "arrayString",
+          "value": [
+            [
+              "448745",
+              "userFiles"
+            ]
+          ],
+          "valueDesc": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "userChatInput",
+          "renderTypeList": [
+            "reference",
+            "textarea"
+          ],
+          "valueType": "string",
+          "label": "workflow:user_question",
+          "toolDescription": "用户问题",
+          "required": true,
+          "value": "自增id：{{$VARIABLE_NODE_ID.id$}}。\n*业务主键：{{$VARIABLE_NODE_ID.dupUid$}}。\n招采方式：{{$VARIABLE_NODE_ID.procureMethod$}}。\n*公告类型：{{$VARIABLE_NODE_ID.noticeType$}}。\n*公告正文：\n{{$VARIABLE_NODE_ID.content$}}。\n*备用字段1：{{$VARIABLE_NODE_ID.spare1$}}。\n*备用字段2：{{$VARIABLE_NODE_ID.spare2$}}。\n*备用字段3：{{$VARIABLE_NODE_ID.spare3$}}。",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "selectedTypeIndex": 1
+        }
+      ],
+      "outputs": [
+        {
+          "id": "history",
+          "key": "history",
+          "required": true,
+          "label": "common:core.module.output.label.New context",
+          "description": "将本次回复内容拼接上历史记录，作为新的上下文返回",
+          "valueType": "chatHistory",
+          "valueDesc": "{\n  obj: System | Human | AI;\n  value: string;\n}[]",
+          "type": "static"
+        },
+        {
+          "id": "answerText",
+          "key": "answerText",
+          "required": true,
+          "label": "common:core.module.output.label.Ai response content",
+          "description": "将在 stream 回复完毕后触发",
+          "valueType": "string",
+          "type": "static",
+          "valueDesc": ""
+        },
+        {
+          "id": "reasoningText",
+          "key": "reasoningText",
+          "required": false,
+          "label": "workflow:reasoning_content",
+          "valueType": "string",
+          "type": "static",
+          "invalid": false,
+          "valueDesc": "",
+          "description": ""
+        },
+        {
+          "id": "system_error_text",
+          "key": "system_error_text",
+          "type": "error",
+          "valueType": "string",
+          "label": "workflow:error_text",
+          "description": ""
+        }
+      ],
+      "catchError": false
+    },
+    {
+      "nodeId": "ksn44PyEpRZRitcf",
+      "name": "解析中标候选人公示正文",
+      "intro": "AI 大模型对话",
+      "avatar": "core/workflow/template/aiChat",
+      "flowNodeType": "chatNode",
+      "showStatus": true,
+      "position": {
+        "x": 4517.063827235203,
+        "y": -2453.0104403738605
+      },
+      "version": "4.9.7",
+      "inputs": [
+        {
+          "key": "model",
+          "renderTypeList": [
+            "settingLLMModel",
+            "reference"
+          ],
+          "label": "common:core.module.input.label.aiModel",
+          "valueType": "string",
+          "value": "Qwen/Qwen3-8B",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "temperature",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "number",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": "",
+          "value": 4
+        },
+        {
+          "key": "maxToken",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "number",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": "",
+          "value": 8192
+        },
+        {
+          "key": "isResponseAnswerText",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "value": true,
+          "valueType": "boolean",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatQuoteRole",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "value": "system",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "quoteTemplate",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "quotePrompt",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatVision",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "boolean",
+          "value": true,
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatReasoning",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "boolean",
+          "value": true,
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatTopP",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "number",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatStopSign",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatResponseFormat",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatJsonSchema",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "systemPrompt",
+          "renderTypeList": [
+            "textarea",
+            "reference"
+          ],
+          "max": 3000,
+          "valueType": "string",
+          "label": "common:core.ai.Prompt",
+          "description": "common:core.app.tip.systemPromptTip",
+          "placeholder": "common:core.app.tip.chatNodeSystemPromptTip",
+          "valueDesc": "",
+          "debugLabel": "",
+          "toolDescription": "",
+          "value": "- Role:\n你是一名烟草招采公告解析专员，专注于解析烟草行业（含中烟工业、各卷烟厂）招采公告文本，精准提取公告中的关键信息（如项目名称、编号、招标人、联系方式、标段/包名称、中标候选人排名、中标候选人名称、投标报价、金额单位等核心字段），确保提取信息的准确性、完整性和规范性，为招采相关后续工作（如投标筹备、信息归档、合规审核）提供基础支撑。\n\n- Skills:\n1、具备较强的文本筛选与信息提炼能力，熟悉烟草行业招采公告的标准格式、常用表述及行业规范，能快速识别公告中的核心字段和关键条款，规避信息遗漏或解读偏差；\n2、了解烟草行业招采相关政策，能精准区分招标人、招标代理机构的相关信息，清晰梳理标段划分、中标候选人排名、中标候选人名称、投标报价、金额单位等核心内容；\n3、具备严谨细致的工作态度，对数字、编号、联系方式等细节信息敏感度高，确保解析结果可直接用于实际工作。\n\n- Background:\n烟草行业招采工作具有严格的合规性要求，公告文本结构规范、信息密度高，包含大量关键字段（如项目编号、招标人信息、标段划分、中标候选人名称、投标报价等），且部分信息（如资格要求、时间节点）直接影响投标有效性和招采工作的合规性。但公告文本篇幅较长、条款繁杂，直接阅读筛选核心信息耗时费力，易出现信息遗漏、解读偏差等问题，影响后续投标筹备、信息归档等工作效率。\n在此背景下，烟草招采公告解析工作应运而生，解析者需依托对烟草行业招采规范的了解，对公告文本进行系统性拆解，精准提取预设核心字段，梳理关键流程和要求，将繁杂的公告文本转化为清晰、规范、可直接使用的核心信息，为投标单位精准对接招采需求、监管部门开展合规监督、相关方推进工作提供高效支撑，保障烟草招采工作的顺畅推进，确保招采过程的公开、公平、公正。\n\n- Task:\n1、从用户问题输入中，按照Rules(规则)提取出目标字段；\n2、输出标准的json格式的提取结果。\n\n- Goals:\n1、从用户问题输入中提取并输出含有以下目标字段的json代码块。\ndupUid：主表业务主键\nprojectName：项目名称\nprojectNumber：项目编号\ntendererName：招标人名称\ntendererPhoneNumber：招标人联系电话\ncandidates：独立字段名，表示这是一个候选人列表\npackageNumber：包号（标段号）\npackageName：包名称（标段名称）\nsupplierRanking：中标候选人排名\ncandidateName：中标候选人名称\nbidPriceIncludingTax：投标报价（含税）\nbidPriceExcludingTax：投标报价（不含税）\ncurrencyUnit：金额单位\nspare1：备用字段1\nspare2：备用字段2\nspare3：备用字段3\n\n- Rules:\n1、直接将用户问题输入中的业务主键字段的值，填入dupUid字段；\n2、仅从给定的【公告正文】中提取信息，不得编造、不得补充、不得省略、不得推理；\n3、提取文本中的完整项目名称，填入projectName字段；\n4、提取文本中的完整项目编号字符串，填入projectNumber字段；\n5、提取文本中的完整招标人名称，填入tendererName字段；\n6、提取招标人信息下方对应的完整招标人联系电话号码，填入tendererPhoneNumber字段；\n7、候选人列表，填入candidates数组：\n7.1、找到文本中评标结果或中标候选人信息，提取所有001、002…开头的标段号，以字符串形式填入packageNumber字段；\n7.2、找到文本中评标结果或中标候选人信息，提取对应标段的完整标段名称，以字符串形式填入packageName字段；\n7.3、找到文本中对中标候选人排名描述相关的语句，提取出中标候选人排名（排名可以相同），以阿拉伯数字字符串形式填入supplierRanking字段；\n7.4、找到文本中的评标结果或中标候选人信息，提取对应排名的中标候选人名称，填入candidateName字段；\n7.5、提取文本中该候选人的投标报价（含税）金额数值，不要带单位和币种，填入bidPriceIncludingTax字段；\n7.6、提取文本中该候选人的投标报价（不含税）金额数值，不要带单位和币种，填入bidPriceExcludingTax字段；\n7.7、当文本中没有特别说明投标报价是否含税时，一律视为投标报价（含税）；\n7.8、提取文本中该候选人投标报价金额数值后面的货币单位，若带有复合计价单位，也一并提取（例如：元、万元、元/年、元/吨等），填入currencyUnit字段；\n7.9、投标报价（含税）或投标报价（含税）金额数值均要进行换算，务必匹配上currencyUnit字段的货币单位；\n7.10、每个候选人独立为一个对象，若同一标段有多个候选人，或存在多个标段，均按候选人维度平铺展开，确保标段、排名、候选人名称、报价金额一一对应；\n8、严格以json格式输出，带有代码块(```)包裹，无任何其他文字。\n\n- Notes:\n1、严格遵循Rules(规则)执行，Example(示例)仅作格式参考！\n2、【公告正文】中可能存在表格形式的数据，务必识别出这些表格及数据，不要识别错了，这非常重要！\n3、【公告正文】中可能存在描述重复的数据，务必识别出这些重复数据，不要输出，这非常重要！\n4、仅根据要求提取出目标字段信息即可，不要自作主张做要求之外的其它处理！\n5、若没有提取到目标字段数据，该字段值留空即可。\n\n- OutputFormat:\n```json\n{\n  \"dupUid\": \"\",\n  \"projectName\": \"\",\n  \"projectNumber\": \"\",\n  \"tendererName\": \"\",\n  \"tendererPhoneNumber\": \"\",\n  \"candidates\": [\n    {\n      \"packageNumber\": \"\",\n      \"packageName\": \"\",\n      \"supplierRanking\": \"\",\n      \"candidateName\": \"\",\n      \"bidPriceIncludingTax\": \"\",\n      \"bidPriceExcludingTax\": \"\",\n      \"currencyUnit\": \"\"\n    },\n    {\n      \"packageNumber\": \"\",\n      \"packageName\": \"\",\n      \"supplierRanking\": \"\",\n      \"candidateName\": \"\",\n      \"bidPriceIncludingTax\": \"\",\n      \"bidPriceExcludingTax\": \"\",\n      \"currencyUnit\": \"\"\n    }\n  ],\n  \"spare1\": \"\",\n  \"spare2\": \"\",\n  \"spare3\": \"\"\n}\n```\n\n- Example:\n```json\n{\n  \"dupUid\": \"3581471c8a6130458a1e5fda120c9aa7\",\n  \"projectName\": \"新疆烟草数据资源管理项目\",\n  \"projectNumber\": \"C202601BA2002471588893\",\n  \"tendererName\": \"新疆维吾尔自治区烟草公司\",\n  \"tendererPhoneNumber\": \"0991-4812410\",\n  \"candidates\": [\n    {\n      \"packageNumber\": \"001\",\n      \"packageName\": \"新疆烟草数据资源管理项目\",\n      \"supplierRanking\": \"1\",\n      \"candidateName\": \"浪潮软件股份有限公司\",\n      \"bidPriceIncludingTax\": \"1980000\",\n      \"bidPriceExcludingTax\": \"\",\n      \"currencyUnit\": \"元\"\n    },\n    {\n      \"packageNumber\": \"001\",\n      \"packageName\": \"新疆烟草数据资源管理项目\",\n      \"supplierRanking\": \"2\",\n      \"candidateName\": \"厦门海晟融创信息技术有限公司\",\n      \"bidPriceIncludingTax\": \"1920000\",\n      \"bidPriceExcludingTax\": \"\",\n      \"currencyUnit\": \"元\"\n    },\n    {\n      \"packageNumber\": \"001\",\n      \"packageName\": \"新疆烟草数据资源管理项目\",\n      \"supplierRanking\": \"3\",\n      \"candidateName\": \"浩鲸云计算科技股份有限公司\",\n      \"bidPriceIncludingTax\": \"2050000\",\n      \"bidPriceExcludingTax\": \"\",\n      \"currencyUnit\": \"元\"\n    }\n  ],\n  \"spare1\": \"\",\n  \"spare2\": \"\",\n  \"spare3\": \"\"\n}\n```",
+          "maxLength": 100000,
+          "isRichText": true
+        },
+        {
+          "key": "history",
+          "renderTypeList": [
+            "numberInput",
+            "reference"
+          ],
+          "valueType": "chatHistory",
+          "label": "common:core.module.input.label.chat history",
+          "description": "workflow:max_dialog_rounds",
+          "required": true,
+          "min": 0,
+          "max": 50,
+          "value": 0,
+          "valueDesc": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "quoteQA",
+          "renderTypeList": [
+            "settingDatasetQuotePrompt"
+          ],
+          "label": "",
+          "debugLabel": "知识库引用",
+          "description": "",
+          "valueType": "datasetQuote",
+          "valueDesc": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "fileUrlList",
+          "renderTypeList": [
+            "reference",
+            "input"
+          ],
+          "label": "app:workflow.user_file_input",
+          "debugLabel": "文件链接",
+          "description": "app:workflow.user_file_input_desc",
+          "valueType": "arrayString",
+          "value": [
+            [
+              "448745",
+              "userFiles"
+            ]
+          ],
+          "valueDesc": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "userChatInput",
+          "renderTypeList": [
+            "reference",
+            "textarea"
+          ],
+          "valueType": "string",
+          "label": "workflow:user_question",
+          "toolDescription": "用户问题",
+          "required": true,
+          "value": "自增id：{{$VARIABLE_NODE_ID.id$}}。\n*业务主键：{{$VARIABLE_NODE_ID.dupUid$}}。\n招采方式：{{$VARIABLE_NODE_ID.procureMethod$}}。\n*公告类型：{{$VARIABLE_NODE_ID.noticeType$}}。\n*公告正文：\n{{$VARIABLE_NODE_ID.content$}}。\n*备用字段1：{{$VARIABLE_NODE_ID.spare1$}}。\n*备用字段2：{{$VARIABLE_NODE_ID.spare2$}}。\n*备用字段3：{{$VARIABLE_NODE_ID.spare3$}}。",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "selectedTypeIndex": 1
+        }
+      ],
+      "outputs": [
+        {
+          "id": "history",
+          "key": "history",
+          "required": true,
+          "label": "common:core.module.output.label.New context",
+          "description": "将本次回复内容拼接上历史记录，作为新的上下文返回",
+          "valueType": "chatHistory",
+          "valueDesc": "{\n  obj: System | Human | AI;\n  value: string;\n}[]",
+          "type": "static"
+        },
+        {
+          "id": "answerText",
+          "key": "answerText",
+          "required": true,
+          "label": "common:core.module.output.label.Ai response content",
+          "description": "将在 stream 回复完毕后触发",
+          "valueType": "string",
+          "type": "static",
+          "valueDesc": ""
+        },
+        {
+          "id": "reasoningText",
+          "key": "reasoningText",
+          "required": false,
+          "label": "workflow:reasoning_content",
+          "valueType": "string",
+          "type": "static",
+          "invalid": false,
+          "valueDesc": "",
+          "description": ""
+        },
+        {
+          "id": "system_error_text",
+          "key": "system_error_text",
+          "type": "error",
+          "valueType": "string",
+          "label": "workflow:error_text",
+          "description": ""
+        }
+      ],
+      "catchError": false
+    },
+    {
+      "nodeId": "iO6Xy8ZZgVVBI6H3",
+      "name": "解析结果公告正文",
+      "intro": "AI 大模型对话",
+      "avatar": "core/workflow/template/aiChat",
+      "flowNodeType": "chatNode",
+      "showStatus": true,
+      "position": {
+        "x": 5275.420069409439,
+        "y": -2453.0104403738605
+      },
+      "version": "4.9.7",
+      "inputs": [
+        {
+          "key": "model",
+          "renderTypeList": [
+            "settingLLMModel",
+            "reference"
+          ],
+          "label": "common:core.module.input.label.aiModel",
+          "valueType": "string",
+          "value": "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "temperature",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "number",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": "",
+          "value": 4
+        },
+        {
+          "key": "maxToken",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "number",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "isResponseAnswerText",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "value": true,
+          "valueType": "boolean",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatQuoteRole",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "value": "system",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "quoteTemplate",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "quotePrompt",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatVision",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "boolean",
+          "value": true,
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatReasoning",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "boolean",
+          "value": true,
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatTopP",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "number",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatStopSign",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatResponseFormat",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "aiChatJsonSchema",
+          "renderTypeList": [
+            "hidden"
+          ],
+          "label": "",
+          "valueType": "string",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "systemPrompt",
+          "renderTypeList": [
+            "textarea",
+            "reference"
+          ],
+          "max": 3000,
+          "valueType": "string",
+          "label": "common:core.ai.Prompt",
+          "description": "common:core.app.tip.systemPromptTip",
+          "placeholder": "common:core.app.tip.chatNodeSystemPromptTip",
+          "valueDesc": "",
+          "debugLabel": "",
+          "toolDescription": "",
+          "value": "- Role:\n你是一名烟草招采公告解析专员，专注于解析烟草行业（含中烟工业、各卷烟厂）招采公告文本，精准提取公告中的关键信息（如项目名称、编号、招标人、联系方式、标段/包名称、中标人排名、中标人名称、中标人联系电话、中标金额、金额单位等核心字段），确保提取信息的准确性、完整性和规范性，为招采相关后续工作（如投标筹备、信息归档、合规审核）提供基础支撑。\n\n- Skills:\n1、具备较强的文本筛选与信息提炼能力，熟悉烟草行业招采公告的标准格式、常用表述及行业规范，能快速识别公告中的核心字段和关键条款，规避信息遗漏或解读偏差；\n2、了解烟草行业招采相关政策，能精准区分招标人、招标代理机构的相关信息，清晰梳理标段划分、中标人排名、中标人名称、中标人联系电话、中标金额、金额单位等核心内容；\n3、具备严谨细致的工作态度，对数字、编号、联系方式等细节信息敏感度高，确保解析结果可直接用于实际工作。\n\n- Background:\n烟草行业招采工作具有严格的合规性要求，公告文本结构规范、信息密度高，包含大量关键字段（如项目编号、招标人信息、标段划分、中标人名称、中标人联系电话、中标金额等），且部分信息（如资格要求、时间节点）直接影响投标有效性和招采工作的合规性。但公告文本篇幅较长、条款繁杂，直接阅读筛选核心信息耗时费力，易出现信息遗漏、解读偏差等问题，影响后续投标筹备、信息归档等工作效率。\n在此背景下，烟草招采公告解析工作应运而生，解析者需依托对烟草行业招采规范的了解，对公告文本进行系统性拆解，精准提取预设核心字段，梳理关键流程和要求，将繁杂的公告文本转化为清晰、规范、可直接使用的核心信息，为投标单位精准对接招采需求、监管部门开展合规监督、相关方推进工作提供高效支撑，保障烟草招采工作的顺畅推进，确保招采过程的公开、公平、公正。\n\n- Task:\n1、从用户问题输入中，按照Rules(规则)提取出目标字段；\n2、输出标准的json格式的提取结果。\n\n- Goals:\n1、从用户问题输入中提取并输出含有以下目标字段的json代码块。\ndupUid：主表业务主键\nprojectName：项目名称\nprojectNumber：项目编号\ntendererName：招标人名称\ntendererPhoneNumber：招标人联系电话\nwinBidders：独立字段名，表示这是一个中标人列表\npackageNumber：包号（标段号）\npackageName：包名称（标段名称）\nsupplierRanking：中标人排名\nwinBidderName：中标人名称\nwinBidderContactNumber：中标人联系电话\nbidAmountIncludingTax：中标金额（含税）\nbidAmountExcludingTax：中标金额（不含税）\ncurrencyUnit：金额单位\nspare1：备用字段1\nspare2：备用字段2\nspare3：备用字段3\n\n- Rules:\n1、直接将用户问题输入中的业务主键字段的值，填入dupUid字段；\n2、仅从给定的【公告正文】中提取信息，不得编造、不得补充、不得省略、不得推理；\n3、提取文本中的完整项目名称，填入projectName字段；\n4、提取文本中的完整项目编号字符串，填入projectNumber字段；\n5、提取文本中的完整招标人名称，填入tendererName字段；\n6、提取招标人信息下方对应的完整招标人联系电话号码，填入tendererPhoneNumber字段；\n7、中标人列表，填入winBidders数组：\n7.1、找到文本中评标结果或中标人信息，提取所有001、002…开头的标段号，以字符串形式填入packageNumber字段；\n7.2、找到文本中评标结果或中标人信息，提取对应标段的完整标段名称，以字符串形式填入packageName字段；\n7.3、找到文本中对中标人排名描述相关的语句，提取出中标人排名（排名可以相同），以阿拉伯数字字符串形式填入supplierRanking字段；\n7.4、找到文本中的评标结果或中标人信息，提取对应排名的中标人名称，填入winBidderName字段；\n7.5、找到文本中的评标结果或中标人信息，提取对应中标人联系电话，填入winBidderContactNumber字段；\n7.6、仅提取文本中中标金额（含税）金额数值，不要带单位和币种，填入bidAmountIncludingTax字段；\n7.7、仅提取文本中中标金额（不含税）金额数值，不要带单位和币种，填入bidAmountExcludingTax字段；\n7.8、当文本中没有特别说明中标金额是否含税时，一律视为中标金额（含税）；\n7.9、提取文本中中标金额（含税）或中标金额（不含税）金额数值后面的货币单位，若带有复合计价单位，也一并提取(例如元、万元、元/年、元/吨等)，填入currencyUnit字段；\n7.10、中标金额（含税）或中标金额（不含税）金额数值均要进行数学换算，务必匹配上currencyUnit字段的货币单位；\n7.11、每个中标人独立为一个对象，若同一标段有多个中标人，或存在多个标段，均按中标人维度平铺展开，确保标段、排名、中标人名称、中标人联系电话、中标金额一一对应；\n8、严格以json格式输出，带有代码块(```)包裹，无任何其他文字。\n\n- Notes:\n1、严格遵循Rules(规则)执行，Example(示例)仅作格式参考！\n2、【公告正文】中可能存在表格形式的数据，务必识别出这些表格及数据，不要识别错了，这非常重要！\n3、【公告正文】中可能存在描述重复的数据，务必识别出这些重复数据，不要输出，这非常重要！\n4、仅根据要求提取出目标字段信息即可，不要自作主张做要求之外的其它处理！\n5、若没有提取到目标字段数据，该字段值留空即可。\n\n- OutputFormat:\n```json\n{\n  \"dupUid\": \"\",\n  \"projectName\": \"\",\n  \"projectNumber\": \"\",\n  \"tendererName\": \"\",\n  \"tendererPhoneNumber\": \"\",\n  \"winBidders\": [\n    {\n      \"packageNumber\": \"\",\n      \"packageName\": \"\",\n      \"supplierRanking\": \"\",\n      \"winBidderName\": \"\",\n      \"winBidderContactNumber\": \"\",\n      \"bidAmountIncludingTax\": \"\",\n      \"bidAmountExcludingTax\": \"\",\n      \"currencyUnit\": \"\"\n    },\n    {\n      \"packageNumber\": \"\",\n      \"packageName\": \"\",\n      \"supplierRanking\": \"\",\n      \"winBidderName\": \"\",\n      \"winBidderContactNumber\": \"\",\n      \"bidAmountIncludingTax\": \"\",\n      \"bidAmountExcludingTax\": \"\",\n      \"currencyUnit\": \"\"\n    }\n  ],\n  \"spare1\": \"\",\n  \"spare2\": \"\",\n  \"spare3\": \"\"\n}\n```\n\n- Example:\n```json\n{\n  \"dupUid\": \"3a4d480a4d7e319da230036b9289aef9\",\n  \"projectName\": \"网络安全设备购置项目\",\n  \"projectNumber\": \"B202501BA2002615209101\",\n  \"tendererName\": \"广东韶关烟叶复烤有限公司\",\n  \"tendererPhoneNumber\": \"0751-8281691\",\n  \"winBidders\": [\n    {\n      \"packageNumber\": \"001\",\n      \"packageName\": \"网络安全设备购置项目\",\n      \"supplierRanking\": \"\",\n      \"winBidderName\": \"中时讯通信建设有限公司\",\n      \"winBidderContactNumber\": \"\",\n      \"bidAmountIncludingTax\": \"293360.00\",\n      \"bidAmountExcludingTax\": \"\",\n      \"currencyUnit\": \"元\"\n    }\n  ],\n  \"spare1\": \"\",\n  \"spare2\": \"\",\n  \"spare3\": \"\"\n}\n```",
+          "maxLength": 100000,
+          "isRichText": true
+        },
+        {
+          "key": "history",
+          "renderTypeList": [
+            "numberInput",
+            "reference"
+          ],
+          "valueType": "chatHistory",
+          "label": "common:core.module.input.label.chat history",
+          "description": "workflow:max_dialog_rounds",
+          "required": true,
+          "min": 0,
+          "max": 50,
+          "value": 0,
+          "valueDesc": "",
+          "debugLabel": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "quoteQA",
+          "renderTypeList": [
+            "settingDatasetQuotePrompt"
+          ],
+          "label": "",
+          "debugLabel": "知识库引用",
+          "description": "",
+          "valueType": "datasetQuote",
+          "valueDesc": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "fileUrlList",
+          "renderTypeList": [
+            "reference",
+            "input"
+          ],
+          "label": "app:workflow.user_file_input",
+          "debugLabel": "文件链接",
+          "description": "app:workflow.user_file_input_desc",
+          "valueType": "arrayString",
+          "value": [
+            [
+              "448745",
+              "userFiles"
+            ]
+          ],
+          "valueDesc": "",
+          "toolDescription": ""
+        },
+        {
+          "key": "userChatInput",
+          "renderTypeList": [
+            "reference",
+            "textarea"
+          ],
+          "valueType": "string",
+          "label": "workflow:user_question",
+          "toolDescription": "用户问题",
+          "required": true,
+          "value": "自增id：{{$VARIABLE_NODE_ID.id$}}。\n*业务主键：{{$VARIABLE_NODE_ID.dupUid$}}。\n招采方式：{{$VARIABLE_NODE_ID.procureMethod$}}。\n*公告类型：{{$VARIABLE_NODE_ID.noticeType$}}。\n*公告正文：\n{{$VARIABLE_NODE_ID.content$}}。\n*备用字段1：{{$VARIABLE_NODE_ID.spare1$}}。\n*备用字段2：{{$VARIABLE_NODE_ID.spare2$}}。\n*备用字段3：{{$VARIABLE_NODE_ID.spare3$}}。",
+          "valueDesc": "",
+          "description": "",
+          "debugLabel": "",
+          "selectedTypeIndex": 1
+        }
+      ],
+      "outputs": [
+        {
+          "id": "history",
+          "key": "history",
+          "required": true,
+          "label": "common:core.module.output.label.New context",
+          "description": "将本次回复内容拼接上历史记录，作为新的上下文返回",
+          "valueType": "chatHistory",
+          "valueDesc": "{\n  obj: System | Human | AI;\n  value: string;\n}[]",
+          "type": "static"
+        },
+        {
+          "id": "answerText",
+          "key": "answerText",
+          "required": true,
+          "label": "common:core.module.output.label.Ai response content",
+          "description": "将在 stream 回复完毕后触发",
+          "valueType": "string",
+          "type": "static",
+          "valueDesc": ""
+        },
+        {
+          "id": "reasoningText",
+          "key": "reasoningText",
+          "required": false,
+          "label": "workflow:reasoning_content",
+          "valueType": "string",
+          "type": "static",
+          "invalid": false,
+          "valueDesc": "",
+          "description": ""
+        },
+        {
+          "id": "system_error_text",
+          "key": "system_error_text",
+          "type": "error",
+          "valueType": "string",
+          "label": "workflow:error_text",
+          "description": ""
+        }
+      ],
+      "catchError": false
+    }
+  ],
+  "edges": [
+    {
+      "source": "sIT99QNwT9m3SiQM",
+      "target": "zda3vj7BvdcFPeAI",
+      "sourceHandle": "sIT99QNwT9m3SiQM-source-ELSE",
+      "targetHandle": "zda3vj7BvdcFPeAI-target-left"
+    },
+    {
+      "source": "sIT99QNwT9m3SiQM",
+      "target": "hpBjDyzAQKiDHAwx",
+      "sourceHandle": "sIT99QNwT9m3SiQM-source-IF",
+      "targetHandle": "hpBjDyzAQKiDHAwx-target-left"
+    },
+    {
+      "source": "sIT99QNwT9m3SiQM",
+      "target": "rAOYghkLtueUuZ15",
+      "sourceHandle": "sIT99QNwT9m3SiQM-source-ELSE IF 1",
+      "targetHandle": "rAOYghkLtueUuZ15-target-left"
+    },
+    {
+      "source": "sIT99QNwT9m3SiQM",
+      "target": "ksn44PyEpRZRitcf",
+      "sourceHandle": "sIT99QNwT9m3SiQM-source-ELSE IF 2",
+      "targetHandle": "ksn44PyEpRZRitcf-target-left"
+    },
+    {
+      "source": "sIT99QNwT9m3SiQM",
+      "target": "iO6Xy8ZZgVVBI6H3",
+      "sourceHandle": "sIT99QNwT9m3SiQM-source-ELSE IF 3",
+      "targetHandle": "iO6Xy8ZZgVVBI6H3-target-left"
+    },
+    {
+      "source": "448745",
+      "target": "sIT99QNwT9m3SiQM",
+      "sourceHandle": "448745-source-right",
+      "targetHandle": "sIT99QNwT9m3SiQM-target-left"
+    }
+  ],
+  "chatConfig": {
+    "welcomeText": "",
+    "variables": [
+      {
+        "id": "wlTSL2",
+        "key": "id",
+        "label": "id",
+        "type": "input",
+        "description": "自增id",
+        "required": false,
+        "valueType": "string",
+        "list": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ],
+        "defaultValue": "",
+        "maxLength": 64,
+        "enums": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ],
+        "icon": "core/workflow/inputType/input"
+      },
+      {
+        "id": "sOJuMj",
+        "key": "dupUid",
+        "label": "dupUid",
+        "type": "input",
+        "description": "业务主键",
+        "required": true,
+        "valueType": "string",
+        "list": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ],
+        "defaultValue": "",
+        "maxLength": 128,
+        "enums": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ],
+        "icon": "core/workflow/inputType/input"
+      },
+      {
+        "id": "a4C3Ga",
+        "key": "procureMethod",
+        "label": "procureMethod",
+        "type": "input",
+        "description": "招采方式",
+        "required": false,
+        "valueType": "string",
+        "list": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ],
+        "defaultValue": "",
+        "maxLength": 128,
+        "enums": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ],
+        "icon": "core/workflow/inputType/input"
+      },
+      {
+        "id": "yO2LGf",
+        "key": "noticeType",
+        "label": "noticeType",
+        "type": "input",
+        "description": "公告类型",
+        "required": true,
+        "valueType": "string",
+        "list": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ],
+        "defaultValue": "",
+        "maxLength": 128,
+        "enums": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ],
+        "icon": "core/workflow/inputType/input"
+      },
+      {
+        "id": "l2OKPi",
+        "key": "content",
+        "label": "content",
+        "type": "input",
+        "description": "公告正文",
+        "required": true,
+        "valueType": "string",
+        "list": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ],
+        "defaultValue": "",
+        "enums": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ],
+        "icon": "core/workflow/inputType/input"
+      },
+      {
+        "id": "e1fXt6",
+        "key": "spare1",
+        "label": "spare1",
+        "type": "input",
+        "description": "备用字段1",
+        "required": true,
+        "valueType": "string",
+        "list": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ],
+        "defaultValue": "",
+        "enums": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ]
+      },
+      {
+        "id": "yUB0ty",
+        "key": "spare2",
+        "label": "spare2",
+        "type": "input",
+        "description": "备用字段2",
+        "required": true,
+        "valueType": "string",
+        "list": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ],
+        "defaultValue": "",
+        "enums": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ]
+      },
+      {
+        "id": "wONjYM",
+        "key": "spare3",
+        "label": "spare3",
+        "type": "input",
+        "description": "备用字段3",
+        "required": true,
+        "valueType": "string",
+        "list": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ],
+        "defaultValue": "",
+        "enums": [
+          {
+            "value": "",
+            "label": ""
+          }
+        ]
+      }
+    ],
+    "scheduledTriggerConfig": {
+      "cronString": "",
+      "timezone": "Asia/Taipei",
+      "defaultPrompt": ""
+    },
+    "_id": "69ccce9491eb57f4ad0ae9a6"
+  }
+}
