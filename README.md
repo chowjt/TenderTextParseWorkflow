@@ -106,7 +106,7 @@ python main.py
 #### 1. 构建镜像
 
 ```bash
-docker build -t tender-text-parse:latest .
+docker build -t beijingshiye-tender-text-parse:latest .
 ```
 
 如果构建环境访问 PyPI 较慢或无法访问，可指定国内镜像源：
@@ -115,13 +115,13 @@ docker build -t tender-text-parse:latest .
 docker build \
   --build-arg PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple \
   --build-arg PIP_TRUSTED_HOST=pypi.tuna.tsinghua.edu.cn \
-  -t tender-text-parse:latest .
+  -t beijingshiye-tender-text-parse:latest .
 ```
 
 #### 2. 运行容器
 
 ```bash
-docker run -d -p 26715:26715 --name tender-text-parse --env-file .env tender-text-parse:latest
+docker run -d -p 26715:26715 --name beijingshiye-tender-text-parse --env-file .env beijingshiye-tender-text-parse:latest
 ```
 
 ### 方式三：Docker Compose 启动（推荐）
