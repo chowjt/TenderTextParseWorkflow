@@ -13,13 +13,13 @@ load_dotenv(_project_root / ".env")
 # 模型配置 - 从 .env 读取敏感信息
 # ============================================================
 
-MODEL_NAME = os.getenv("MODEL_NAME", "deepseek-ai/DeepSeek-V3")
-MODEL_BASE_URL = os.getenv("MODEL_BASE_URL", "https://api.siliconflow.cn/v1")
+MODEL_NAME = os.getenv("MODEL_NAME", "")
+MODEL_BASE_URL = os.getenv("MODEL_BASE_URL", "")
 MODEL_API_KEY = os.getenv("MODEL_API_KEY", "")
 
 # 模型参数
-MODEL_TEMPERATURE = float(os.getenv("MODEL_TEMPERATURE", "0.4"))
-MODEL_MAX_TOKEN = int(os.getenv("MODEL_MAX_TOKEN", "8192"))
+MODEL_TEMPERATURE = float(os.getenv("MODEL_TEMPERATURE", ""))
+MODEL_MAX_TOKEN = int(os.getenv("MODEL_MAX_TOKEN", ""))
 
 # ============================================================
 # 公告类型枚举 - 一比一还原JSON中ifElseNode的4个条件分支

@@ -9,6 +9,9 @@ __pycache__/
 # 日志
 logs/
 
+# 数据库
+data/
+
 # IDE
 .idea/
 .vscode/

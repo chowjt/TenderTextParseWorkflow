@@ -63,6 +63,7 @@ class WorkflowState(TypedDict, total=False):
     spare3: str
     parse_result: Optional[Any]
     error_message: Optional[str]
+    model_usage: Optional[Dict[str, Any]]
 
 
 # ============================================================
@@ -96,6 +97,40 @@ def get_model() -> ChatOpenAI:
 # 通用解析函数
 # ============================================================
 
+def _extract_model_usage(response: Any) -> Dict[str, Any]:
+    """
+    从LangChain模型响应(AIMessage)中提取真实的model和usage信息。
+    """
+    result = {
+        "model": "",
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+    }
+
+    response_metadata = getattr(response, "response_metadata", {}) or {}
+    model_name = response_metadata.get("model_name") or getattr(response, "model", "") or ""
+    result["model"] = model_name
+
+    # 优先从 usage_metadata 读取（langchain标准）
+    usage_metadata = getattr(response, "usage_metadata", None)
+    if usage_metadata and isinstance(usage_metadata, dict):
+        result["prompt_tokens"] = usage_metadata.get("input_tokens", 0) or 0
+        result["completion_tokens"] = usage_metadata.get("output_tokens", 0) or 0
+        result["total_tokens"] = usage_metadata.get("total_tokens", 0) or 0
+        return result
+
+    # 兼容从 response_metadata.token_usage 读取
+    token_usage = response_metadata.get("token_usage", {}) or response_metadata.get("usage", {}) or {}
+    if token_usage:
+        result["prompt_tokens"] = token_usage.get("prompt_tokens", 0) or 0
+        result["completion_tokens"] = token_usage.get("completion_tokens", 0) or 0
+        result["total_tokens"] = token_usage.get("total_tokens", 0) or 0
+        return result
+
+    return result
+
+
 def _call_model_and_parse(
     model: ChatOpenAI,
     system_prompt: str,
@@ -126,6 +161,9 @@ def _call_model_and_parse(
     elapsed = time.time() - start
 
     raw_text = response.content
+    # 从LLM原始响应中提取model和usage信息
+    resp_model_usage = _extract_model_usage(response)
+
     WorkflowLogger.log_model_response(
         model_name=model.model_name,
         response_preview=raw_text,
@@ -137,15 +175,15 @@ def _call_model_and_parse(
 
     if parsed_dict is None:
         logger.warning(f"[JSON提取失败] {node_name} | 原始响应预览={raw_text[:300]}")
-        return pydantic_model_class()
+        return pydantic_model_class(), resp_model_usage
 
     try:
         result = pydantic_model_class(**parsed_dict)
         WorkflowLogger.log_parse_result(raw_text, pydantic_model_class.__name__)
-        return result
+        return result, resp_model_usage
     except Exception as e:
         logger.warning(f"[Pydantic验证失败] {node_name} | 错误={e} | 数据={json.dumps(parsed_dict, ensure_ascii=False)[:300]}")
-        return pydantic_model_class(**parsed_dict) if parsed_dict else pydantic_model_class()
+        return pydantic_model_class(**parsed_dict) if parsed_dict else pydantic_model_class(), resp_model_usage
 
 
 def _extract_json_from_response(text: str) -> Optional[dict]:
@@ -212,56 +250,56 @@ def route_notice_type(state: WorkflowState) -> Dict[str, Any]:
 def parse_zhaobiao(state: WorkflowState) -> Dict[str, Any]:
     """解析招标公告正文，统一使用DeepSeek模型"""
     user_input = _build_user_input(state)
-    result = _call_model_and_parse(
+    result, model_usage = _call_model_and_parse(
         model=get_model(),
         system_prompt=ZHAOBIAO_SYSTEM_PROMPT,
         user_input=user_input,
         pydantic_model_class=ZhaobiaoNotice,
         node_name="解析招标公告正文",
     )
-    return {"parse_result": result}
+    return {"parse_result": result, "model_usage": model_usage}
 
 
 @timed_node("解析变更公告正文")
 def parse_biangeng(state: WorkflowState) -> Dict[str, Any]:
     """解析变更公告正文，统一使用DeepSeek模型"""
     user_input = _build_user_input(state)
-    result = _call_model_and_parse(
+    result, model_usage = _call_model_and_parse(
         model=get_model(),
         system_prompt=BIANGENG_SYSTEM_PROMPT,
         user_input=user_input,
         pydantic_model_class=BiangengNotice,
         node_name="解析变更公告正文",
     )
-    return {"parse_result": result}
+    return {"parse_result": result, "model_usage": model_usage}
 
 
 @timed_node("解析中标候选人公示正文")
 def parse_zhongbiao_houxuanren(state: WorkflowState) -> Dict[str, Any]:
     """解析中标候选人公示正文，统一使用DeepSeek模型"""
     user_input = _build_user_input(state)
-    result = _call_model_and_parse(
+    result, model_usage = _call_model_and_parse(
         model=get_model(),
         system_prompt=ZHONGBIAO_HOUXUANREN_SYSTEM_PROMPT,
         user_input=user_input,
         pydantic_model_class=ZhongbiaoHouxuanrenNotice,
         node_name="解析中标候选人公示正文",
     )
-    return {"parse_result": result}
+    return {"parse_result": result, "model_usage": model_usage}
 
 
 @timed_node("解析结果公告正文")
 def parse_jieguo(state: WorkflowState) -> Dict[str, Any]:
     """解析结果公告正文，统一使用DeepSeek模型"""
     user_input = _build_user_input(state)
-    result = _call_model_and_parse(
+    result, model_usage = _call_model_and_parse(
         model=get_model(),
         system_prompt=JIEGUO_SYSTEM_PROMPT,
         user_input=user_input,
         pydantic_model_class=JieguoNotice,
         node_name="解析结果公告正文",
     )
-    return {"parse_result": result}
+    return {"parse_result": result, "model_usage": model_usage}
 
 
 @timed_node("指定回复")
@@ -388,6 +426,7 @@ def run_workflow(input_data: WorkflowInput) -> Dict[str, Any]:
         "spare3": input_data.spare3,
         "parse_result": None,
         "error_message": None,
+        "model_usage": None,
     }
 
     logger.info(

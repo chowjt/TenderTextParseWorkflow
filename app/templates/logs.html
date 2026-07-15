@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>招采公告解析 - 请求日志</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #f5f7fa; color: #333; }
+        .header { background: #1a1a2e; color: #fff; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+        .header h1 { font-size: 20px; font-weight: 600; }
+        .header .stats { font-size: 13px; color: #a0a0b8; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+        /* Token 统计面板 */
+        .stats-section { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .stats-title { font-size: 16px; font-weight: 600; color: #1a1a2e; margin-bottom: 16px; }
+        .stats-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        .stats-tab { padding: 6px 14px; border-radius: 6px; border: 1px solid #ddd; background: #fff; cursor: pointer; font-size: 13px; }
+        .stats-tab.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+        .stats-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .stat-card { background: #f8f9fb; border-radius: 8px; padding: 16px; border-left: 4px solid #1a1a2e; }
+        .stat-label { font-size: 12px; color: #888; margin-bottom: 6px; }
+        .stat-value { font-size: 22px; font-weight: 700; color: #1a1a2e; }
+        .stat-sub { font-size: 12px; color: #999; margin-top: 4px; }
+        .charts-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; }
+        .chart-box { background: #f8f9fb; border-radius: 8px; padding: 16px; }
+        .chart-title { font-size: 14px; font-weight: 600; color: #555; margin-bottom: 12px; }
+        .chart { width: 100%; height: 280px; }
+
+        .filter-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; }
+        .filter-bar select, .filter-bar button { padding: 8px 16px; border-radius: 6px; border: 1px solid #ddd; font-size: 14px; }
+        .filter-bar button { background: #1a1a2e; color: #fff; border: none; cursor: pointer; }
+        .filter-bar button:hover { background: #2d2d5e; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        th { background: #f0f2f5; padding: 12px 14px; text-align: left; font-size: 13px; font-weight: 600; color: #555; white-space: nowrap; }
+        td { padding: 10px 14px; border-top: 1px solid #f0f0f0; font-size: 13px; vertical-align: top; }
+        tr:hover td { background: #fafbfc; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+        .badge-zhaobiao { background: #e8f5e9; color: #2e7d32; }
+        .badge-biangeng { background: #fff3e0; color: #e65100; }
+        .badge-houxuanren { background: #e3f2fd; color: #1565c0; }
+        .badge-jieguo { background: #fce4ec; color: #c62828; }
+        .badge-other { background: #f5f5f5; color: #666; }
+        .badge-ok { background: #e8f5e9; color: #2e7d32; }
+        .badge-err { background: #ffebee; color: #c62828; }
+        .link { color: #1565c0; cursor: pointer; text-decoration: underline; }
+        .pagination { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 16px; }
+        .pagination button { padding: 6px 14px; border-radius: 6px; border: 1px solid #ddd; background: #fff; cursor: pointer; font-size: 13px; }
+        .pagination button:disabled { opacity: 0.4; cursor: default; }
+        .pagination button.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+        .pagination span { font-size: 13px; color: #666; }
+        /* 弹窗 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: flex-start; padding: 40px 20px; overflow-y: auto; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: #fff; border-radius: 12px; width: 100%; max-width: 1000px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid #eee; }
+        .modal-header h2 { font-size: 16px; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+        .modal-body { padding: 24px; max-height: 70vh; overflow-y: auto; }
+        .section { margin-bottom: 24px; }
+        .section-title { font-size: 14px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #1a1a2e; }
+        .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+        .field-grid.single { grid-template-columns: 1fr; }
+        .field-item { display: flex; gap: 8px; padding: 4px 0; font-size: 13px; }
+        .field-label { min-width: 140px; color: #888; flex-shrink: 0; }
+        .field-value { color: #333; word-break: break-all; }
+        .field-value pre { background: #f5f7fa; padding: 12px; border-radius: 6px; overflow-x: hidden; font-size: 13px; line-height: 1.7; white-space: pre-wrap; word-break: break-word; max-height: none; }
+        .content-box { background: #fafbfc; border: 1px solid #e8eaed; border-radius: 8px; padding: 16px; font-size: 13px; line-height: 1.8; color: #333; white-space: pre-wrap; word-break: break-word; max-height: none; overflow: visible; }
+        .json-box { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.6; max-height: 500px; overflow-y: auto; font-family: "Cascadia Code", "Fira Code", "JetBrains Mono", Consolas, monospace; margin: 0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>招采公告解析 - 请求日志</h1>
+        <div class="stats" id="statsInfo"></div>
+    </div>
+    <div class="container">
+        <!-- Token 统计面板 -->
+        <div class="stats-section">
+            <div class="stats-title">Token 消耗统计</div>
+            <div class="stats-tabs" id="statsTabs">
+                <div class="stats-tab active" data-range="1d" onclick="switchStatsRange('1d')">近1天</div>
+                <div class="stats-tab" data-range="7d" onclick="switchStatsRange('7d')">近1周</div>
+                <div class="stats-tab" data-range="30d" onclick="switchStatsRange('30d')">近1月</div>
+                <div class="stats-tab" data-range="month" onclick="switchStatsRange('month')">本年度分月</div>
+                <div class="stats-tab" data-range="year" onclick="switchStatsRange('year')">全部分年</div>
+                <div class="stats-tab" data-range="all" onclick="switchStatsRange('all')">全部总量</div>
+            </div>
+            <div class="stats-cards" id="statsCards">
+                <div class="stat-card">
+                    <div class="stat-label">总 Token 消耗</div>
+                    <div class="stat-value" id="statTotalTokens">-</div>
+                    <div class="stat-sub">请求数: <span id="statRequestCount">-</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">总输入 Token (Prompt)</div>
+                    <div class="stat-value" id="statPromptTokens">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">总输出 Token (Completion)</div>
+                    <div class="stat-value" id="statCompletionTokens">-</div>
+                </div>
+            </div>
+            <div class="charts-row" id="chartsRow">
+                <div class="chart-box">
+                    <div class="chart-title">按公告类型分布</div>
+                    <div id="chartByType" class="chart"></div>
+                </div>
+                <div class="chart-box">
+                    <div class="chart-title" id="trendChartTitle">Token 消耗趋势</div>
+                    <div id="chartTrend" class="chart"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <select id="filterType">
+                <option value="">全部公告类型</option>
+                <option value="招标公告">招标公告</option>
+                <option value="变更公告">变更公告</option>
+                <option value="中标候选人公示">中标候选人公示</option>
+                <option value="结果公告">结果公告</option>
+            </select>
+            <button onclick="loadLogs(1)">查询</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>时间</th>
+                    <th>耗时(ms)</th>
+                    <th>公告类型</th>
+                    <th>chatId</th>
+                    <th>Token消耗</th>
+                    <th>输入Token</th>
+                    <th>输出Token</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="logTableBody"></tbody>
+        </table>
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">请求详情</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let currentStatsRange = '1d';
+        let chartByType = null;
+        let chartTrend = null;
+
+        async function loadLogs(page = 1) {
+            currentPage = page;
+            const noticeType = document.getElementById('filterType').value;
+            const resp = await fetch(`/api/v1/logs/list?page=${page}&page_size=20&notice_type=${encodeURIComponent(noticeType)}`);
+            const data = await resp.json();
+
+            document.getElementById('statsInfo').textContent = `共 ${data.total} 条记录`;
+
+            const tbody = document.getElementById('logTableBody');
+            tbody.innerHTML = '';
+
+            for (const r of data.records) {
+                const badgeClass = {'招标公告':'badge-zhaobiao','变更公告':'badge-biangeng','中标候选人公示':'badge-houxuanren','结果公告':'badge-jieguo'}[r.var_notice_type] || 'badge-other';
+                const statusBadge = r.status_code === 200 ? '<span class="badge badge-ok">200</span>' : `<span class="badge badge-err">${r.status_code}</span>`;
+                tbody.innerHTML += `<tr>
+                    <td>${r.id}</td>
+                    <td>${r.created_at}</td>
+                    <td>${r.elapsed_ms}</td>
+                    <td><span class="badge ${badgeClass}">${r.var_notice_type || '-'}</span></td>
+                    <td title="${r.chat_id}">${(r.chat_id||'').substring(0,10) || '-'}</td>
+                    <td>${r.resp_total_tokens}</td>
+                    <td>${r.resp_prompt_tokens}</td>
+                    <td>${r.resp_completion_tokens}</td>
+                    <td>${statusBadge}</td>
+                    <td><span class="link" onclick="showDetail(${r.id})">详情</span></td>
+                </tr>`;
+            }
+
+            // 分页
+            const pg = document.getElementById('pagination');
+            pg.innerHTML = '';
+            if (data.total_pages > 1) {
+                pg.innerHTML += `<button ${page <= 1 ? 'disabled' : ''} onclick="loadLogs(${page-1})">上一页</button>`;
+                pg.innerHTML += `<span>第 ${page} / ${data.total_pages} 页</span>`;
+                pg.innerHTML += `<button ${page >= data.total_pages ? 'disabled' : ''} onclick="loadLogs(${page+1})">下一页</button>`;
+            }
+        }
+
+        async function loadStats(range = '1d') {
+            currentStatsRange = range;
+
+            // 切换 tab 样式
+            document.querySelectorAll('.stats-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.range === range);
+            });
+
+            const resp = await fetch(`/api/v1/logs/stats?range_type=${range}`);
+            const data = await resp.json();
+            const summary = data.summary;
+
+            document.getElementById('statTotalTokens').textContent = formatNumber(summary.total_tokens);
+            document.getElementById('statPromptTokens').textContent = formatNumber(summary.prompt_tokens);
+            document.getElementById('statCompletionTokens').textContent = formatNumber(summary.completion_tokens);
+            document.getElementById('statRequestCount').textContent = formatNumber(summary.request_count);
+
+            renderByTypeChart(data.by_type);
+            renderTrendChart(data);
+        }
+
+        function switchStatsRange(range) {
+            loadStats(range);
+        }
+
+        function renderByTypeChart(byType) {
+            const dom = document.getElementById('chartByType');
+            if (!chartByType) chartByType = echarts.init(dom);
+
+            const colors = ['#2e7d32', '#e65100', '#1565c0', '#c62828'];
+            const typeColorMap = {'招标公告':'#2e7d32','变更公告':'#e65100','中标候选人公示':'#1565c0','结果公告':'#c62828'};
+
+            const option = {
+                tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+                legend: { bottom: 0, left: 'center', textStyle: { fontSize: 12 } },
+                color: colors,
+                series: [{
+                    type: 'pie',
+                    radius: ['40%', '65%'],
+                    center: ['50%', '45%'],
+                    data: byType.map(item => ({
+                        name: item.notice_type || '其他',
+                        value: item.total_tokens,
+                        itemStyle: { color: typeColorMap[item.notice_type] || '#999' }
+                    })),
+                    label: { show: true, formatter: '{b}\n{c}', fontSize: 11 }
+                }]
+            };
+            chartByType.setOption(option, true);
+        }
+
+        function renderTrendChart(data) {
+            const dom = document.getElementById('chartTrend');
+            if (!chartTrend) chartTrend = echarts.init(dom);
+
+            let xData = [], sPrompt = [], sCompletion = [], sTotal = [], title = 'Token 消耗趋势';
+
+            if (currentStatsRange === 'year' || currentStatsRange === 'all') {
+                // 按年展示
+                title = '年度 Token 消耗统计';
+                document.getElementById('trendChartTitle').textContent = title;
+                const rows = data.by_year;
+                xData = rows.map(i => i.year);
+                sPrompt = rows.map(i => i.prompt_tokens);
+                sCompletion = rows.map(i => i.completion_tokens);
+                sTotal = rows.map(i => i.total_tokens);
+            } else if (currentStatsRange === 'month') {
+                // 本年度按月展示
+                title = '本年度分月 Token 消耗统计';
+                document.getElementById('trendChartTitle').textContent = title;
+                const rows = data.by_month;
+                xData = rows.map(i => i.month);
+                sPrompt = rows.map(i => i.prompt_tokens);
+                sCompletion = rows.map(i => i.completion_tokens);
+                sTotal = rows.map(i => i.total_tokens);
+            } else {
+                // 1d / 7d / 30d 按天展示
+                const labelMap = {'1d':'近1天','7d':'近1周','30d':'近1月'};
+                title = `${labelMap[currentStatsRange]} 分日 Token 消耗趋势`;
+                document.getElementById('trendChartTitle').textContent = title;
+                const rows = data.by_day || [];
+                xData = rows.map(i => i.day);
+                sPrompt = rows.map(i => i.prompt_tokens);
+                sCompletion = rows.map(i => i.completion_tokens);
+                sTotal = rows.map(i => i.total_tokens);
+            }
+
+            // 如果按天数据为空，也使用按月的兜底
+            if (xData.length === 0 && data.by_month.length > 0 && currentStatsRange !== 'month') {
+                xData = data.by_month.map(i => i.month);
+                sPrompt = data.by_month.map(i => i.prompt_tokens);
+                sCompletion = data.by_month.map(i => i.completion_tokens);
+                sTotal = data.by_month.map(i => i.total_tokens);
+            }
+
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' }
+                },
+                legend: { data: ['Prompt', 'Completion', 'Total'], bottom: 0, textStyle: { fontSize: 12 } },
+                grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
+                xAxis: { type: 'category', data: xData, axisLabel: { rotate: xData.length > 7 ? 30 : 0, fontSize: 11 } },
+                yAxis: { type: 'value', axisLabel: { fontSize: 11 } },
+                series: [
+                    { name: 'Prompt', type: 'bar', stack: 'total', data: sPrompt, itemStyle: { color: '#64b5f6' } },
+                    { name: 'Completion', type: 'bar', stack: 'total', data: sCompletion, itemStyle: { color: '#81c784' } },
+                    { name: 'Total', type: 'line', data: sTotal, itemStyle: { color: '#c62828' }, lineStyle: { width: 2 }, symbol: 'circle', symbolSize: 6 }
+                ]
+            };
+            chartTrend.setOption(option, true);
+        }
+
+        function formatNumber(n) {
+            if (n === undefined || n === null) return '-';
+            return Number(n).toLocaleString('zh-CN');
+        }
+
+        async function showDetail(id) {
+            const resp = await fetch(`/api/v1/logs/detail/${id}`);
+            const d = await resp.json();
+
+            document.getElementById('modalTitle').textContent = `请求详情 #${d.id}`;
+            const body = document.getElementById('modalBody');
+
+            // 解析choices JSON - 去掉```json```包裹，渲染为黑框JSON
+            let choicesHtml = '-';
+            try {
+                const choices = JSON.parse(d.resp_choices || '[]');
+                choicesHtml = choices.map((c, i) => {
+                    let content = c.message ? c.message.content : '';
+                    // 去掉 ```json ... ``` 包裹
+                    content = content.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?\s*```$/, '');
+                    // 尝试解析为JSON并格式化
+                    let displayContent;
+                    try {
+                        const jsonObj = JSON.parse(content.trim());
+                        displayContent = JSON.stringify(jsonObj, null, 2);
+                    } catch(e) {
+                        displayContent = content;
+                    }
+                    return `<pre class="json-box">${escapeHtml(displayContent)}</pre>`;
+                }).join('');
+            } catch(e) { choicesHtml = escapeHtml(d.resp_choices || '-'); }
+
+            // 解析messages JSON
+            let messagesHtml = '-';
+            try {
+                const msgs = JSON.parse(d.messages || '[]');
+                messagesHtml = msgs.map(m => `<div><strong>${m.role}:</strong> ${escapeHtml(m.content||'')}</div>`).join('');
+            } catch(e) { messagesHtml = escapeHtml(d.messages || '-'); }
+
+            body.innerHTML = `
+                <div class="section">
+                    <div class="section-title">一、请求 Header</div>
+                    <div class="field-grid">
+                        <div class="field-item"><span class="field-label">Authorization</span><span class="field-value">${escapeHtml(d.auth_masked)}</span></div>
+                        <div class="field-item"><span class="field-label">Content-Type</span><span class="field-value">${escapeHtml(d.content_type)}</span></div>
+                    </div>
+                </div>
+                <div class="section">
+                    <div class="section-title">二、请求 Body</div>
+                    <div class="field-grid">
+                        <div class="field-item"><span class="field-label">chatId</span><span class="field-value">${escapeHtml(d.chat_id)}</span></div>
+                        <div class="field-item"><span class="field-label">responseChatItemId</span><span class="field-value">${escapeHtml(d.response_chat_item_id)}</span></div>
+                        <div class="field-item"><span class="field-label">stream</span><span class="field-value">${d.stream ? 'true' : 'false'}</span></div>
+                        <div class="field-item"><span class="field-label">detail</span><span class="field-value">${d.detail ? 'true' : 'false'}</span></div>
+                    </div>
+                    <div style="margin-top:12px;font-size:13px;font-weight:600;color:#555;">variables:</div>
+                    <div class="field-grid" style="margin-top:4px;">
+                        <div class="field-item"><span class="field-label">id</span><span class="field-value">${escapeHtml(d.var_id)}</span></div>
+                        <div class="field-item"><span class="field-label">noticeType</span><span class="field-value">${escapeHtml(d.var_notice_type)}</span></div>
+                        <div class="field-item"><span class="field-label">spare1</span><span class="field-value">${escapeHtml(d.var_spare1)}</span></div>
+                        <div class="field-item"><span class="field-label">spare2</span><span class="field-value">${escapeHtml(d.var_spare2)}</span></div>
+                        <div class="field-item"><span class="field-label">spare3</span><span class="field-value">${escapeHtml(d.var_spare3)}</span></div>
+                    </div>
+                    <div class="field-grid single" style="margin-top:12px;">
+                        <div class="field-item" style="flex-direction: column; gap: 8px;">
+                            <span class="field-label" style="min-width: auto;">content（公告原文）</span>
+                            <div class="content-box">${escapeHtml(d.var_content)}</div>
+                        </div>
+                    </div>
+                    <div style="margin-top:12px;font-size:13px;font-weight:600;color:#555;">messages:</div>
+                    <div style="margin-top:4px;font-size:13px;">${messagesHtml}</div>
+                </div>
+                <div class="section">
+                    <div class="section-title">三、响应 Body</div>
+                    <div class="field-grid">
+                        <div class="field-item"><span class="field-label">resp_id</span><span class="field-value">${escapeHtml(d.resp_id)}</span></div>
+                        <div class="field-item"><span class="field-label">model</span><span class="field-value">${escapeHtml(d.resp_model)}</span></div>
+                        <div class="field-item"><span class="field-label">prompt_tokens</span><span class="field-value">${d.resp_prompt_tokens}</span></div>
+                        <div class="field-item"><span class="field-label">completion_tokens</span><span class="field-value">${d.resp_completion_tokens}</span></div>
+                        <div class="field-item"><span class="field-label">total_tokens</span><span class="field-value">${d.resp_total_tokens}</span></div>
+                        <div class="field-item"><span class="field-label">status_code</span><span class="field-value">${d.status_code}</span></div>
+                    </div>
+                    <div style="margin-top:12px;font-size:13px;font-weight:600;color:#555;">choices:</div>
+                    <div style="margin-top:4px;">${choicesHtml}</div>
+                </div>
+            `;
+            document.getElementById('modalOverlay').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('show');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = String(text);
+            return div.innerHTML;
+        }
+
+        // 点击遮罩关闭弹窗
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // 窗口大小变化时重绘图表
+        window.addEventListener('resize', function() {
+            if (chartByType) chartByType.resize();
+            if (chartTrend) chartTrend.resize();
+        });
+
+        // 初始加载
+        loadLogs(1);
+        loadStats('1d');
+    </script>
+</body>
+</html>
