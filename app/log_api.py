@@ -21,8 +21,8 @@ router = APIRouter(prefix="/api/v1/logs", tags=["日志查询"])
 
 
 def _range_time(range_type: Literal["1d", "7d", "30d", "month", "year", "all"]):
-    """根据范围类型计算起始和结束时间，格式：YYYY-MM-DD HH:MM:SS"""
-    now = datetime.now()
+    """根据范围类型计算起始和结束时间，格式：YYYY-MM-DD HH:MM:SS（统一使用UTC时间，与数据库写入时间一致）"""
+    now = datetime.utcnow()
     end_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
     if range_type == "1d":
