@@ -160,6 +160,8 @@ def _save_log_to_db(
     chat_request: ChatRequest,
     response: ChatResponse,
     elapsed_ms: int,
+    status_code: int = 200,
+    error_message: str = "",
 ):
     """将请求和响应的完整数据写入SQLite数据库"""
     # 请求Header
@@ -209,8 +211,8 @@ def _save_log_to_db(
             "resp_completion_tokens": response.usage.completion_tokens,
             "resp_total_tokens": response.usage.total_tokens,
             "resp_choices": json.dumps(choices_list, ensure_ascii=False)[:50000],
-            "status_code": 200,
-            "error_message": "",
+            "status_code": status_code,
+            "error_message": error_message,
         })
     except Exception as e:
         logger.error(f"[{response.id}] 日志写入数据库失败: {e}")
@@ -252,8 +254,8 @@ async def chat_completions(
             ],
         )
         elapsed_ms = int((time.time() - start_time) * 1000)
-        _save_log_to_db(request, chat_request, response, elapsed_ms)
-        return response
+        _save_log_to_db(request, chat_request, response, elapsed_ms, status_code=400, error_message=UNSUPPORTED_TYPE_MESSAGE)
+        raise HTTPException(status_code=400, detail=UNSUPPORTED_TYPE_MESSAGE)
 
     # 构造工作流输入
     workflow_input = WorkflowInput(
@@ -285,8 +287,9 @@ async def chat_completions(
             ],
         )
         elapsed_ms = int((time.time() - start_time) * 1000)
-        _save_log_to_db(request, chat_request, response, elapsed_ms)
-        return response
+        error_message = f"服务内部错误，请稍后重试: {str(e)[:200]}"
+        _save_log_to_db(request, chat_request, response, elapsed_ms, status_code=500, error_message=error_message)
+        raise HTTPException(status_code=500, detail="服务内部错误，请稍后重试")
 
     elapsed = time.time() - start_time
 
@@ -338,7 +341,7 @@ async def chat_completions(
 
     # 写入数据库（包含完整choices内容）
     elapsed_ms = int(elapsed * 1000)
-    _save_log_to_db(request, chat_request, response, elapsed_ms)
+    _save_log_to_db(request, chat_request, response, elapsed_ms, status_code=200, error_message="")
 
     return response
 
