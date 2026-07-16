@@ -78,6 +78,7 @@ def _create_model() -> ChatOpenAI:
         api_key=MODEL_API_KEY,
         temperature=MODEL_TEMPERATURE,
         max_tokens=MODEL_MAX_TOKEN,
+        timeout=600,
     )
 
 

@@ -9,12 +9,17 @@ FastAPI服务主体 - 暴露POST接口，接收入参并返回出参。
 import time
 import json
 import uuid
+import os
+import asyncio
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Callable
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel, Field
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
+from pydantic import BaseModel, Field, field_validator
 
 from app.auth import verify_authorization
 from app.api_logger import ApiLoggingMiddleware
@@ -26,6 +31,20 @@ from app.workflow import run_workflow
 
 logger = setup_logging()
 
+MAX_REQUEST_SIZE = 2 * 1024 * 1024
+REQUEST_TIMEOUT = 600
+
+
+class RequestTimeoutMiddleware(BaseHTTPMiddleware):
+    """请求超时中间件，设置全局请求超时时间"""
+    
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        try:
+            return await asyncio.wait_for(call_next(request), timeout=REQUEST_TIMEOUT)
+        except asyncio.TimeoutError:
+            logger.error(f"[请求超时] URL={request.url.path} | 超时时间={REQUEST_TIMEOUT}秒")
+            raise HTTPException(status_code=504, detail="请求超时，请稍后重试")
+
 # ============================================================
 # FastAPI应用实例
 # ============================================================
@@ -35,6 +54,25 @@ app = FastAPI(
     description="解析招标公告、变更公告、中标候选人公示、结果公告，返回结构化JSON",
     version="1.0.0",
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("CORS_ALLOWED_ORIGINS") else [],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# 注册请求超时中间件（全局600秒超时）
+app.add_middleware(RequestTimeoutMiddleware)
 
 # 注册日志中间件（仅记录日志文件）
 app.add_middleware(ApiLoggingMiddleware)
@@ -57,6 +95,12 @@ class VariableInput(BaseModel):
     spare1: str = Field(default="", description="预留扩展字段1")
     spare2: str = Field(default="", description="预留扩展字段2")
     spare3: str = Field(default="", description="预留扩展字段3")
+
+    @field_validator("content")
+    def validate_content_size(cls, v):
+        if len(v.encode("utf-8")) > MAX_REQUEST_SIZE:
+            raise HTTPException(status_code=413, detail="请求体大小超过限制（最大2MB）")
+        return v
 
 
 class ChatMessage(BaseModel):
@@ -144,7 +188,7 @@ def _save_log_to_db(
     try:
         insert_log({
             "request_id": response.id,
-            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "created_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
             "elapsed_ms": elapsed_ms,
             "auth_masked": masked_auth,
             "content_type": content_type,
@@ -154,7 +198,7 @@ def _save_log_to_db(
             "detail": 1 if chat_request.detail else 0,
             "var_id": variables.id,
             "var_notice_type": variables.noticeType,
-            "var_content": variables.content or "",
+            "var_content": (variables.content or "")[:50000],
             "var_spare1": variables.spare1,
             "var_spare2": variables.spare2,
             "var_spare3": variables.spare3,
@@ -164,7 +208,7 @@ def _save_log_to_db(
             "resp_prompt_tokens": response.usage.prompt_tokens,
             "resp_completion_tokens": response.usage.completion_tokens,
             "resp_total_tokens": response.usage.total_tokens,
-            "resp_choices": json.dumps(choices_list, ensure_ascii=False),
+            "resp_choices": json.dumps(choices_list, ensure_ascii=False)[:50000],
             "status_code": 200,
             "error_message": "",
         })
@@ -177,6 +221,7 @@ def _save_log_to_db(
 # ============================================================
 
 @app.post("/api/v1/chat/completions", response_model=ChatResponse)
+@limiter.limit(os.getenv("RATE_LIMIT", "100/minute"))
 async def chat_completions(
     chat_request: ChatRequest,
     request: Request,
@@ -233,7 +278,7 @@ async def chat_completions(
             usage=UsageInfo(),
             choices=[
                 ChoiceItem(
-                    message=MessageOutput(role="assistant", content=f"工作流执行异常: {str(e)}"),
+                    message=MessageOutput(role="assistant", content="服务内部错误，请稍后重试"),
                     finish_reason="stop",
                     index=0,
                 )

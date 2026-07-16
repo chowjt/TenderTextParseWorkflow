@@ -35,8 +35,11 @@
         .filter-bar button:hover { background: #2d2d5e; }
         table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
         th { background: #f0f2f5; padding: 12px 14px; text-align: left; font-size: 13px; font-weight: 600; color: #555; white-space: nowrap; }
-        td { padding: 10px 14px; border-top: 1px solid #f0f0f0; font-size: 13px; vertical-align: top; }
+        td { padding: 8px 10px; border-top: 1px solid #f0f0f0; font-size: 13px; vertical-align: top; }
         tr:hover td { background: #fafbfc; }
+        td.notice-name { max-width: 260px; line-height: 1.5; }
+        td.notice-name .name-text { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
+        table th, table td { white-space: normal; word-break: break-word; }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
         .badge-zhaobiao { background: #e8f5e9; color: #2e7d32; }
         .badge-biangeng { background: #fff3e0; color: #e65100; }
@@ -51,14 +54,17 @@
         .pagination button:disabled { opacity: 0.4; cursor: default; }
         .pagination button.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
         .pagination span { font-size: 13px; color: #666; }
+        .pagination input.page-input { width: 50px; padding: 6px 4px; border-radius: 6px; border: 1px solid #ddd; font-size: 13px; text-align: center; }
         /* 弹窗 */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: flex-start; padding: 40px 20px; overflow-y: auto; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: flex-start; padding: 30px 20px; overflow-y: auto; }
         .modal-overlay.show { display: flex; }
-        .modal { background: #fff; border-radius: 12px; width: 100%; max-width: 1000px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid #eee; }
+        .modal { background: #fff; border-radius: 12px; width: 100%; max-width: 1100px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; border-bottom: 1px solid #eee; }
         .modal-header h2 { font-size: 16px; }
         .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
-        .modal-body { padding: 24px; max-height: 70vh; overflow-y: auto; }
+        .modal-body { padding: 20px 24px; max-height: 78vh; overflow-y: auto; }
+        .modal-body .field-grid { gap: 6px 20px; }
+        .modal-body .field-item { padding: 3px 0; }
         .section { margin-bottom: 24px; }
         .section-title { font-size: 14px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #1a1a2e; }
         .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
@@ -90,7 +96,7 @@
             </div>
             <div class="stats-cards" id="statsCards">
                 <div class="stat-card">
-                    <div class="stat-label">总 Token 消耗</div>
+                    <div class="stat-label">总 Token 消耗 (Total)</div>
                     <div class="stat-value" id="statTotalTokens">-</div>
                     <div class="stat-sub">请求数: <span id="statRequestCount">-</span></div>
                 </div>
@@ -132,7 +138,7 @@
                     <th>时间</th>
                     <th>耗时(ms)</th>
                     <th>公告类型</th>
-                    <th>chatId</th>
+                    <th>公告名称</th>
                     <th>Token消耗</th>
                     <th>输入Token</th>
                     <th>输出Token</th>
@@ -176,12 +182,13 @@
             for (const r of data.records) {
                 const badgeClass = {'招标公告':'badge-zhaobiao','变更公告':'badge-biangeng','中标候选人公示':'badge-houxuanren','结果公告':'badge-jieguo'}[r.var_notice_type] || 'badge-other';
                 const statusBadge = r.status_code === 200 ? '<span class="badge badge-ok">200</span>' : `<span class="badge badge-err">${r.status_code}</span>`;
+                const noticeName = extractNoticeName(r.messages);
                 tbody.innerHTML += `<tr>
                     <td>${r.id}</td>
-                    <td>${r.created_at}</td>
+                    <td>${formatBeijingTime(r.created_at)}</td>
                     <td>${r.elapsed_ms}</td>
                     <td><span class="badge ${badgeClass}">${r.var_notice_type || '-'}</span></td>
-                    <td title="${r.chat_id}">${(r.chat_id||'').substring(0,10) || '-'}</td>
+                    <td class="notice-name" title="${escapeHtml(noticeName)}"><div class="name-text">${escapeHtml(noticeName)}</div></td>
                     <td>${r.resp_total_tokens}</td>
                     <td>${r.resp_prompt_tokens}</td>
                     <td>${r.resp_completion_tokens}</td>
@@ -195,9 +202,21 @@
             pg.innerHTML = '';
             if (data.total_pages > 1) {
                 pg.innerHTML += `<button ${page <= 1 ? 'disabled' : ''} onclick="loadLogs(${page-1})">上一页</button>`;
-                pg.innerHTML += `<span>第 ${page} / ${data.total_pages} 页</span>`;
+                pg.innerHTML += `<span>第 <input type="number" class="page-input" id="currentPageInput" value="${page}" min="1" max="${data.total_pages}" onkeydown="if(event.key==='Enter') goToCurrentPage(${data.total_pages})"> / ${data.total_pages} 页</span>`;
                 pg.innerHTML += `<button ${page >= data.total_pages ? 'disabled' : ''} onclick="loadLogs(${page+1})">下一页</button>`;
+            } else {
+                pg.innerHTML += `<span>第 ${page} / ${data.total_pages} 页</span>`;
             }
+        }
+
+        function goToCurrentPage(totalPages) {
+            const input = document.getElementById('currentPageInput');
+            const target = parseInt(input.value, 10);
+            if (!target || target < 1 || target > totalPages) {
+                input.value = currentPage;
+                return;
+            }
+            loadLogs(target);
         }
 
         async function loadStats(range = '1d') {
@@ -257,9 +276,18 @@
 
             let xData = [], sPrompt = [], sCompletion = [], sTotal = [], title = 'Token 消耗趋势';
 
-            if (currentStatsRange === 'year' || currentStatsRange === 'all') {
-                // 按年展示
-                title = '年度 Token 消耗统计';
+            if (currentStatsRange === 'year') {
+                // 全部分年：按年展示
+                title = '全部 分年 Token 消耗统计';
+                document.getElementById('trendChartTitle').textContent = title;
+                const rows = data.by_year;
+                xData = rows.map(i => i.year);
+                sPrompt = rows.map(i => i.prompt_tokens);
+                sCompletion = rows.map(i => i.completion_tokens);
+                sTotal = rows.map(i => i.total_tokens);
+            } else if (currentStatsRange === 'all') {
+                // 全部总量：按年展示总量趋势
+                title = '全部总量 Token 消耗统计';
                 document.getElementById('trendChartTitle').textContent = title;
                 const rows = data.by_year;
                 xData = rows.map(i => i.year);
@@ -268,16 +296,25 @@
                 sTotal = rows.map(i => i.total_tokens);
             } else if (currentStatsRange === 'month') {
                 // 本年度按月展示
-                title = '本年度分月 Token 消耗统计';
+                title = '本年度 分月 Token 消耗统计';
                 document.getElementById('trendChartTitle').textContent = title;
                 const rows = data.by_month;
                 xData = rows.map(i => i.month);
                 sPrompt = rows.map(i => i.prompt_tokens);
                 sCompletion = rows.map(i => i.completion_tokens);
                 sTotal = rows.map(i => i.total_tokens);
+            } else if (currentStatsRange === '1d') {
+                // 近1天按小时展示（数据库UTC时间加8小时转换为北京时间）
+                title = '近1天 分时 Token 消耗趋势';
+                document.getElementById('trendChartTitle').textContent = title;
+                const rows = data.by_hour || [];
+                xData = rows.map(i => i.hour ? formatBeijingHour(i.hour) : '');
+                sPrompt = rows.map(i => i.prompt_tokens);
+                sCompletion = rows.map(i => i.completion_tokens);
+                sTotal = rows.map(i => i.total_tokens);
             } else {
-                // 1d / 7d / 30d 按天展示
-                const labelMap = {'1d':'近1天','7d':'近1周','30d':'近1月'};
+                // 7d / 30d 按天展示
+                const labelMap = {'7d':'近1周','30d':'近1月'};
                 title = `${labelMap[currentStatsRange]} 分日 Token 消耗趋势`;
                 document.getElementById('trendChartTitle').textContent = title;
                 const rows = data.by_day || [];
@@ -287,14 +324,6 @@
                 sTotal = rows.map(i => i.total_tokens);
             }
 
-            // 如果按天数据为空，也使用按月的兜底
-            if (xData.length === 0 && data.by_month.length > 0 && currentStatsRange !== 'month') {
-                xData = data.by_month.map(i => i.month);
-                sPrompt = data.by_month.map(i => i.prompt_tokens);
-                sCompletion = data.by_month.map(i => i.completion_tokens);
-                sTotal = data.by_month.map(i => i.total_tokens);
-            }
-
             const option = {
                 tooltip: {
                     trigger: 'axis',
@@ -302,7 +331,7 @@
                 },
                 legend: { data: ['Prompt', 'Completion', 'Total'], bottom: 0, textStyle: { fontSize: 12 } },
                 grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
-                xAxis: { type: 'category', data: xData, axisLabel: { rotate: xData.length > 7 ? 30 : 0, fontSize: 11 } },
+                xAxis: { type: 'category', data: xData, axisLabel: { rotate: xData.length > 8 ? 30 : 0, fontSize: 11 } },
                 yAxis: { type: 'value', axisLabel: { fontSize: 11 } },
                 series: [
                     { name: 'Prompt', type: 'bar', stack: 'total', data: sPrompt, itemStyle: { color: '#64b5f6' } },
@@ -317,6 +346,70 @@
             if (n === undefined || n === null) return '-';
             return Number(n).toLocaleString('zh-CN');
         }
+
+        // 从 messages 数组中提取 user 角色的 content 作为公告名称
+        function extractNoticeName(messagesJson) {
+            try {
+                const msgs = JSON.parse(messagesJson || '[]');
+                if (Array.isArray(msgs)) {
+                    const userMsg = msgs.find(m => m.role === 'user');
+                    if (userMsg && userMsg.content) {
+                        return String(userMsg.content).trim();
+                    }
+                }
+            } catch (e) {}
+            return '-';
+        }
+
+// 数据库UTC时间 → 东八区北京时间
+function formatBeijingTime(utcTimeStr) {
+    if (!utcTimeStr) return '-';
+    try {
+        const pad = n => String(n).padStart(2, '0');
+        const parseDateTime = (s) => {
+            const m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.\d+)?$/);
+            if (!m) return null;
+            // 生成纯UTC时间戳
+            return Date.UTC(
+                Number(m[1]),
+                Number(m[2]) - 1,
+                Number(m[3]),
+                Number(m[4]),
+                Number(m[5]),
+                Number(m[6])
+            );
+        };
+
+        const utcTs = parseDateTime(utcTimeStr);
+        if (!utcTs || isNaN(utcTs)) return utcTimeStr;
+
+        // UTC时间戳 + 8小时毫秒数 = 北京时间戳
+        const beijingTs = utcTs + 8 * 60 * 60 * 1000;
+        const d = new Date(beijingTs);
+
+        return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+    } catch (e) {
+        console.error('时间转换错误', e);
+        return utcTimeStr;
+    }
+}
+
+// 数据库UTC小时（YYYY-MM-DD HH:00）加8小时转换为北京时间，返回 HH:00
+function formatBeijingHour(hourStr) {
+    if (!hourStr) return '-';
+    try {
+        const m = String(hourStr).match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):00$/);
+        if (!m) return hourStr;
+        const pad = n => String(n).padStart(2, '0');
+        const d = new Date(Date.UTC(
+            parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10),
+            parseInt(m[4], 10) + 8, 0, 0
+        ));
+        return `${pad(d.getUTCHours())}:00`;
+    } catch (e) {
+        return hourStr;
+    }
+}
 
         async function showDetail(id) {
             const resp = await fetch(`/api/v1/logs/detail/${id}`);

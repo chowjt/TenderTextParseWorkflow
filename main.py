@@ -62,6 +62,7 @@ def start_server():
         host="0.0.0.0",
         port=port,
         log_level="info",
+        timeout_keep_alive=650,
     )
 
 

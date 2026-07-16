@@ -5,6 +5,7 @@ SQLite数据库模块 - 存储每次请求的完整日志。
 
 import sqlite3
 import json
+import os
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, List, Dict, Any
@@ -15,7 +16,8 @@ logger = setup_logging()
 
 # 数据库文件路径（项目根目录/data/logs.db）
 DB_DIR = Path(__file__).resolve().parent.parent / "data"
-DB_DIR.mkdir(exist_ok=True)
+DB_DIR.mkdir(exist_ok=True, mode=0o700)
+os.chmod(str(DB_DIR), 0o700)
 DB_PATH = DB_DIR / "logs.db"
 
 
@@ -79,6 +81,7 @@ def init_db():
     """)
     conn.commit()
     conn.close()
+    os.chmod(str(DB_PATH), 0o600)
     logger.info(f"[数据库初始化] {DB_PATH}")
 
 
@@ -146,6 +149,7 @@ def query_logs(page: int = 1, page_size: int = 20, notice_type: str = "") -> Dic
                stream, detail,
                var_id, var_notice_type,
                var_spare1, var_spare2, var_spare3,
+               messages,
                resp_id, resp_model,
                resp_prompt_tokens, resp_completion_tokens, resp_total_tokens,
                status_code, error_message
@@ -293,6 +297,30 @@ def query_stats_token_usage_by_day(start_time: str, end_time: str) -> List[Dict[
         WHERE created_at >= ? AND created_at <= ?
         GROUP BY strftime('%Y-%m-%d', created_at)
         ORDER BY day ASC
+        """,
+        (start_time, end_time),
+    )
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def query_stats_token_usage_by_hour(start_time: str, end_time: str) -> List[Dict[str, Any]]:
+    """按小时统计指定时间范围内的 Token 消耗"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT
+            strftime('%Y-%m-%d %H:00', created_at) AS hour,
+            COALESCE(SUM(resp_prompt_tokens), 0) AS prompt_tokens,
+            COALESCE(SUM(resp_completion_tokens), 0) AS completion_tokens,
+            COALESCE(SUM(resp_total_tokens), 0) AS total_tokens,
+            COUNT(*) AS request_count
+        FROM request_logs
+        WHERE created_at >= ? AND created_at <= ?
+        GROUP BY strftime('%Y-%m-%d %H:00', created_at)
+        ORDER BY hour ASC
         """,
         (start_time, end_time),
     )

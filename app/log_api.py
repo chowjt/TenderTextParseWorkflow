@@ -14,6 +14,7 @@ from app.db import (
     query_stats_token_usage_by_month,
     query_stats_token_usage_by_year,
     query_stats_token_usage_by_day,
+    query_stats_token_usage_by_hour,
 )
 
 router = APIRouter(prefix="/api/v1/logs", tags=["日志查询"])
@@ -85,6 +86,7 @@ async def get_logs_stats(
     by_month = query_stats_token_usage_by_month(start_time, end_time)
     by_year = query_stats_token_usage_by_year(start_time, end_time)
     by_day = query_stats_token_usage_by_day(start_time, end_time)
+    by_hour = query_stats_token_usage_by_hour(start_time, end_time)
 
     return {
         "summary": summary,
@@ -92,6 +94,7 @@ async def get_logs_stats(
         "by_month": by_month,
         "by_year": by_year,
         "by_day": by_day,
+        "by_hour": by_hour,
         "range": {
             "type": range_type,
             "start_time": start_time,

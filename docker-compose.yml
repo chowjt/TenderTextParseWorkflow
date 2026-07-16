@@ -6,12 +6,12 @@ services:
     image: beijingshiye-tender-text-parse:latest
     container_name: beijingshiye-tender-text-parse
     ports:
-      - "26715:26715"
+      - "6715:26715"
     env_file:
       - .env
     volumes:
       # 本地持久化：SQLite 数据库目录
-      - ./data:/tmp/beijingshiye-tender-text-parse/data
+      - ./data:/app/data
       # 本地持久化：日志文件目录
-      - ./logs:/tmp/beijingshiye-tender-text-parse/logs
+      - ./logs:/app/logs
     restart: unless-stopped
